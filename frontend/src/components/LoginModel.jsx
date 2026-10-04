@@ -1,6 +1,11 @@
 import React from 'react'
 import { motion } from "motion/react";
 import { FaGoogle, FaTimes } from "react-icons/fa";
+import { signInWithPopup } from 'firebase/auth'
+import { auth, provider } from '../utils/firebase'
+import api from '../utils/axios';
+
+
 
 const container = {
   hidden: {},
@@ -13,6 +18,18 @@ const item = {
 }
 
 function LoginModel({onClose}) {
+    const handleGoogleAuth = async()=>{
+    try {
+        const result = await signInWithPopup(auth,provider);
+      const token = await result.user?.getIdToken()
+      const response = await  api.post("/api/auth/login",{token})
+      onClose()
+      console.log(result)
+
+    } catch (error) {
+        console.log(error);
+    }
+}
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -57,6 +74,7 @@ function LoginModel({onClose}) {
 
           {/* Google auth button */}
           <motion.button
+          onClick={handleGoogleAuth}
             variants={item}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
