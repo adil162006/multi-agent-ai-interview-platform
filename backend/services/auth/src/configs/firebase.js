@@ -1,5 +1,5 @@
 import { cert, initializeApp } from "firebase-admin/app";
-import { ENV } from "./env";
+import { ENV } from "./env.js";
 
 
 

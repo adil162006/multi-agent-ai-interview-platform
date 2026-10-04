@@ -17,12 +17,13 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } },
 }
 
-function LoginModel({onClose}) {
+function LoginModel({onClose,setUser}) {
     const handleGoogleAuth = async()=>{
     try {
         const result = await signInWithPopup(auth,provider);
       const token = await result.user?.getIdToken()
       const response = await  api.post("/api/auth/login",{token})
+      setUser(response?.data?.user)
       onClose()
       console.log(result)
 

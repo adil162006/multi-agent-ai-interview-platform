@@ -1,6 +1,6 @@
 import { getAuth } from "firebase-admin/auth";
-import { app } from "../configs/firebase";
-import { User } from "../model/user.model";
+import { app } from "../configs/firebase.js";
+import { User } from "../models/user.model.js";
 import redis from "../../../../shared/redis/redis.js"
 
 

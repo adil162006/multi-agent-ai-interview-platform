@@ -4,7 +4,7 @@ import { GiArtificialHive } from "react-icons/gi";
 import { CiLocationArrow1 } from "react-icons/ci";
 import LoginModel from '../components/LoginModel';
 import { useState } from 'react';
-function Home() {
+function Home({setUser}) {
   const [showLogin, setShowLogin] = useState(false);
 
   return (
@@ -36,7 +36,7 @@ function Home() {
       {/* main area */}
       <section className='relative pt-20 overflow-hidden bg-[#f8f9fa]'>
       </section>
-      {showLogin && <LoginModel onClose={()=>setShowLogin(false)}/>}
+      {showLogin && <LoginModel onClose={()=>setShowLogin(false)} setUser={setUser}/>}
     </div>
   )
 }

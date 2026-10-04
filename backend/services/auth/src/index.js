@@ -1,13 +1,14 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import { connectDb } from "./configs/db.js";
-
 import { ENV } from "./configs/env.js";
+import authRouter from "./routes/auth.route.js";
 
 const app = express()
 
 app.use(express.json())
 app.use(cookieParser())
+app.use("/", authRouter)
 
 app.get("/",(req,res)=>{
     res.json("hello from Auth service")
