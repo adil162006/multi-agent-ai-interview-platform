@@ -1,12 +1,12 @@
+import "dotenv/config";
 import express from "express";
-import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import cors from "cors"
 import proxy from "express-http-proxy";
 import { isAuth } from "./middleware/isAuth.js";
 import { getCurrentUser } from "./controller/user.controller.js";
-dotenv.config()
+import { proxyWithHeaders } from "./utils/proxyWithHeaders.js";
 
 const app = express()
 
@@ -23,6 +23,7 @@ const PORT = process.env.PORT
 
 
 app.use("/api/auth",proxy((process.env.AUTH_SERVICE_URL)))
+app.use("/api/resume",isAuth,proxyWithHeaders((process.env.RESUME_SERVICE_URL)))
 app.get("/api/me",isAuth,getCurrentUser)
 app.listen(PORT,()=>{
     console.log(`gateway server running on ${PORT}`)
