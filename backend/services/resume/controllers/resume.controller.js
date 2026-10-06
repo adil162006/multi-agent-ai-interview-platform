@@ -45,7 +45,7 @@ export const uploadResume = async (req,res)=>{
         })
     } catch (error) {
         if(file){
-        await fs.unlink(file.path)
+        await fs.unlinkSync(file.path)
         }
         console.error(error);
 

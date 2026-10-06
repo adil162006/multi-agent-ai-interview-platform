@@ -14,7 +14,7 @@ const mainLinks = [
 const agentLinks = [
   { label: 'Resume Builder', to: '/resume-builder', icon: FiFileText },
   { label: 'Roadmap Builder', to: '/roadmap-builder', icon: FiMap },
-  { label: 'Resume Scorer', to: '/resume-scorer', icon: FiStar },
+  { label: 'Resume Scorer', to: '/scorer', icon: FiStar },
 ]
 
 const EXPANDED = 260
