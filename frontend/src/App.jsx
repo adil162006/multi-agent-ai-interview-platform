@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import Home from "./pages/Home";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
+import Scorer from "./pages/Scorer";
+import ResumePreview from "./components/resume/ResumePreview";
 import { getCurrentUser } from "./apis/user.api";
 import { getResume } from "./apis/resume.api";
 import { useDispatch } from "react-redux";
@@ -70,6 +72,16 @@ function App() {
         element={
           user ? (
             <Scorer user={user} setUser={setUser} />
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
+      />
+      <Route
+        path="/resume"
+        element={
+          user ? (
+            <ResumePreview />
           ) : (
             <Navigate to="/" replace />
           )

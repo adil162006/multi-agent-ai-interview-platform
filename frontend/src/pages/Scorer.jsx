@@ -1,24 +1,56 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { motion } from 'motion/react'
-import { FiUploadCloud } from 'react-icons/fi'
+import { FiAlertCircle, FiTrendingUp, FiUploadCloud, FiUser } from 'react-icons/fi'
 import api from '../utils/axios'
 import { useDispatch, useSelector } from 'react-redux'
 import { setResume } from '../redux/resumeSlice'
+import {RadialBarChart} from 'recharts'
+import Navbar from '../components/Navbar'
 
-const Navbar = ({label})=>{
-    const navigate = useNavigate()
+
+const Tag = ({text, color}) => {
+    const styles = {
+        purple: "bg-purple-50 text-purple-700 border-purple-200",
+        red: "bg-red-50 text-red-700 border-red-200",
+        green: "bg-green-50 text-green-700 border-green-200",
+        yellow: "bg-yellow-50 text-yellow-700 border-yellow-200",
+    };
     return(
-        <nav className='fixed inset-x-0 top-0 border-b border-black/8 bg-white/8 backdrop-blur-xl'>
-            <div className='mx-auto flex h-12 max-w-7xl items-center justify-start px-3 sm:px-5' onClick={()=> navigate("/dashboard")}>
-                <div className='flex cursor-pointer items-center gap-1.5' >
-                    <span className='text-sm font-extrabold sm:text-base text-black'>HireMind</span>
-                    <span className='hidden rounded bg-black/5 px-1.5 py-0.5 text-[10px] text-black/50 sm:block'>{label}</span>
-                </div>
-            </div>
-        </nav>
+        <div className={`text-[10px] px-1.5 py-1 rounded-md border font-medium ${styles[color]}`}>
+            {text}
+        </div>
     )
 }
+
+const ScoreRing = ({score})=>{
+    const color = score >= 75 ? "#7c3aed" : score >= 50 ? "#f59e0b" : "#ef4444";
+    return(
+        <div className='relative flex items-center justify-center'>
+            <RadialBarChart
+                width={110}
+                height={110}
+                cx={55}
+                cy={55}
+                innerRadius={40}
+                outerRadius={53}
+                startAngle={90}
+                endAngle={-270}
+                data={[{ value: score, fill: color }]}
+                barSize={8}
+            >
+                <PolarAngleAxis type="number" domain={[0, 100]} tick={false}/>
+                <RadialBar background={{ fill: "#e5e7eb" }} dataKey="value" cornerRadius={8}/>
+                <div className='absolute flex items-center'>
+                        <span className='text-lg font-bold text-white leading-none'>{score}</span>
+                        <span className='text-[9px] text-gray-200 mt-0.5'>/100</span>
+                </div>
+
+                   
+            </RadialBarChart>
+        </div>
+    )
+}
+
 
 function Scorer({user,setUser}) {
     
@@ -45,6 +77,126 @@ function Scorer({user,setUser}) {
             alert("upload failed")
         }
     }
+
+    // score section
+    if(resume){
+        return(
+           <div className='min-h-screen bg-white text-[#0A0A0A]'>
+  <Navbar label="Resume Scorer"/>
+
+  <section className='max-w-6xl mx-auto px-3 pt-18 sm:pt-20 pb-8 space-y-3.5'>
+      {/* header */}
+        <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
+            <div>
+                <p className='text-[10px] text-black/40 tracking-widest uppercase mb-0.5'>Resume Analysis</p>
+                <h2 className='text-lg font-bold'>{resume?.name}</h2>
+            </div>
+            <button 
+                onClick={() => dispatch(setResume(null))}
+                className='text-[10px] sm:text-xs text-black/50 hover:text-[#0A0A0A] border border-black/15 hover:border-black/35 px-2.5 py-1 rounded-lg transition-colors'
+                >
+                Re-upload
+            </button>
+        </div>
+        <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.05 }}
+        className='relative overflow-hidden bg-[#000000]/90 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 flex flex-col items-center gap-4 sm:flex-row shadow-[0_8px_32px_rgba(0,0,0,0.2)]'
+        >
+        <div className='absolute inset-0 bg-gradient-to-br from-white/[0.08] via-transparent to-transparent pointer-events-none'/>
+         <div className='relative'>
+            <ScoreRing score={resume.score}/>
+
+         </div>
+            <div className='relative'>
+                <p className='text-white/50 text-xs mb-0.5'>Resume Score</p>
+                <p className='text-lg sm:text-xl font-bold mb-1.5 text-white'>
+                    {resume.score >= 75 ? "Strong" : resume.score >= 50 ? "Average" : "Needs Work"}
+                </p>
+                <div className='flex items-center gap-1.5'>
+                    <FiUser className='text-purple-400 text-xs'/>
+                    <span className='text-xs text-purple-300'>{resume?.suggestedRole}</span>
+                </div>
+            </div>
+        </motion.div>
+
+
+        <div className='grid grid-cols-1 gap-3 md:grid-cols-2'>
+
+        <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.05 }}
+            className='relative overflow-hidden bg-[#000000]/90 backdrop-blur-2xl border border-white/10 rounded-2xl p-4   sm:flex-row shadow-[0_8px_32px_rgba(0,0,0,0.2)]'
+        >
+        <div className='absolute inset-0 bg-gradient-to-br from-white/[0.08] via-transparent to-transparent pointer-events-none'/>
+        <div className='relative flex items-center gap-1.5 mb-2.5'>
+            <FiAlertCircle className='text-green-400' size={14}/>
+            <span className='text-xs font-semibold text-white'>Strengths</span>
+        </div>
+
+        <div className='relative flex flex-wrap gap-1.5'>
+            {resume?.strengths?.map(s=><Tag text={s} key={s} color="green" />)}
+        </div>
+        </motion.div>
+        <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.05 }}
+            className='relative overflow-hidden bg-[#000000]/90 backdrop-blur-2xl border border-white/10 rounded-2xl p-4   sm:flex-row shadow-[0_8px_32px_rgba(0,0,0,0.2)]'
+        >
+        <div className='absolute inset-0 bg-gradient-to-br from-white/[0.08] via-transparent to-transparent pointer-events-none'/>
+        <div className='relative flex items-center gap-1.5 mb-2.5'>
+            <FiAlertCircle className='text-yellow-400' size={14}/>
+            <span className='text-xs font-semibold text-white'>Weakness</span>
+        </div>
+
+        <div className='relative flex flex-wrap gap-1.5'>
+            {resume?.weaknesses?.map(s=><Tag text={s} key={s} color="yellow" />)}
+        </div>
+        </motion.div>
+        </div>
+
+        {/* Missing Skills */}
+        <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.05 }}
+            className='relative overflow-hidden bg-[#000000]/90 backdrop-blur-2xl border border-white/10 rounded-2xl p-4   sm:flex-row shadow-[0_8px_32px_rgba(0,0,0,0.2)]'
+        >
+        <div className='absolute inset-0 bg-gradient-to-br from-white/[0.08] via-transparent to-transparent pointer-events-none'/>
+        <div className='relative flex items-center gap-1.5 mb-2.5'>
+            <FiAlertCircle className='text-red-400' size={14}/>
+            <span className='text-xs font-semibold text-white'>Missing Skills</span>
+        </div>
+
+        <div className='relative flex flex-wrap gap-1.5'>
+            {resume?.missingSkills?.map(s=><Tag text={s} key={s} color="red" />)}
+        </div>
+        </motion.div>
+        {/* Recommendations */}
+        <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.05 }}
+            className='relative overflow-hidden bg-[#000000]/90 backdrop-blur-2xl border border-white/10 rounded-2xl p-4   sm:flex-row shadow-[0_8px_32px_rgba(0,0,0,0.2)]'
+        >
+        <div className='absolute inset-0 bg-gradient-to-br from-white/[0.08] via-transparent to-transparent pointer-events-none'/>
+        <div className='relative flex items-center gap-1.5 mb-2.5'>
+            <FiTrendingUp className='text-purple-400' size={14}/>
+            <span className='text-xs font-semibold text-white'>Recommendations</span>
+        </div>
+
+        <div className='relative flex flex-wrap gap-1.5'>
+            {resume?.recommendations?.map(s=><Tag text={s} key={s} color="purple" />)}
+        </div>
+        </motion.div>
+    </section>
+    </div>
+        )
+    }
+
     // upload section
   return (
     <div className='min-h-screen bg-white text-black'>
