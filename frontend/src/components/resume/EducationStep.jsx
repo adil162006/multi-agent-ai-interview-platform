@@ -1,5 +1,5 @@
-import EntryList from '../EntryList'
-import { EDUCATION_FIELDS } from '../../../constants/resume'
+import EntryList from './EntryList'
+import { EDUCATION_FIELDS } from '../../constants/resume'
 
 const EducationStep = ({ data, form }) => (
   <EntryList

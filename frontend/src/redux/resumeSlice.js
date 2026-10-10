@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit"
 
 
  const resumeSlice = createSlice({
-    name:resume,
+    name:"resume",
     initialState:{
         resume:null
     },

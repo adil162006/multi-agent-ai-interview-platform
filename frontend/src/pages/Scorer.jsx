@@ -4,7 +4,7 @@ import { FiAlertCircle, FiTrendingUp, FiUploadCloud, FiUser } from 'react-icons/
 import api from '../utils/axios'
 import { useDispatch, useSelector } from 'react-redux'
 import { setResume } from '../redux/resumeSlice'
-import {RadialBarChart} from 'recharts'
+import { PolarAngleAxis, RadialBar, RadialBarChart } from 'recharts'
 import Navbar from '../components/Navbar'
 
 
@@ -40,13 +40,11 @@ const ScoreRing = ({score})=>{
             >
                 <PolarAngleAxis type="number" domain={[0, 100]} tick={false}/>
                 <RadialBar background={{ fill: "#e5e7eb" }} dataKey="value" cornerRadius={8}/>
-                <div className='absolute flex items-center'>
-                        <span className='text-lg font-bold text-white leading-none'>{score}</span>
-                        <span className='text-[9px] text-gray-200 mt-0.5'>/100</span>
-                </div>
-
-                   
             </RadialBarChart>
+            <div className='pointer-events-none absolute inset-0 z-10 flex items-center justify-center'>
+                <span className='text-lg font-bold leading-none text-white'>{score}</span>
+                <span className='ml-0.5 mt-0.5 text-[9px] text-gray-200'>/100</span>
+            </div>
         </div>
     )
 }
@@ -60,26 +58,30 @@ function Scorer({user,setUser}) {
 
     const dispatch = useDispatch()
     const {resume}=useSelector((state)=>state.resume)
-    const uploadResume = async (file) => {
+    const uploadResume = async () => {
         if(!file){
             alert("please select a pdf ")
+            return
         }
         try {
             setLoading(true);
             const formData = new FormData();
             formData.append("resume",file)
-            const response = await api.post("/api/resume/upload",formData)
+            const response = await api.post("/api/resume/",formData)
             dispatch(setResume(response?.data?.data))
             console.log(response.data)
             setLoading(false)
         } catch (error) {
             console.log(error);
-            alert("upload failed")
+            alert(error.response?.data?.message ?? "upload failed")
+            setLoading(false)
         }
     }
 
     // score section
     if(resume){
+        const strengths = resume.strengths?.length ? resume.strengths : resume.strength ?? []
+        const weaknesses = resume.weaknesses?.length ? resume.weaknesses : resume.weakness ?? []
         return(
            <div className='min-h-screen bg-white text-[#0A0A0A]'>
   <Navbar label="Resume Scorer"/>
@@ -137,7 +139,9 @@ function Scorer({user,setUser}) {
         </div>
 
         <div className='relative flex flex-wrap gap-1.5'>
-            {resume?.strengths?.map(s=><Tag text={s} key={s} color="green" />)}
+            {strengths.length
+                ? strengths.map(s=><Tag text={s} key={s} color="green" />)
+                : <span className='text-xs text-white/50'>No strengths available.</span>}
         </div>
         </motion.div>
         <motion.div
@@ -153,7 +157,9 @@ function Scorer({user,setUser}) {
         </div>
 
         <div className='relative flex flex-wrap gap-1.5'>
-            {resume?.weaknesses?.map(s=><Tag text={s} key={s} color="yellow" />)}
+            {weaknesses.length
+                ? weaknesses.map(s=><Tag text={s} key={s} color="yellow" />)
+                : <span className='text-xs text-white/50'>No weaknesses available.</span>}
         </div>
         </motion.div>
         </div>

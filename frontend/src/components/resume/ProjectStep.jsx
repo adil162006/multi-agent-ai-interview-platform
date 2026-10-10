@@ -1,5 +1,5 @@
-import EntryList from '../EntryList'
-import { PROJECT_FIELDS } from '../../../constants/resume'
+import EntryList from './EntryList'
+import { PROJECT_FIELDS } from '../../constants/resume'
 
 const ProjectsStep = ({ data, form }) => (
   <EntryList

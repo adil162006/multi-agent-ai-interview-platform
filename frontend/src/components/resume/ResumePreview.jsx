@@ -1,3 +1,8 @@
+import { useState } from 'react'
+import html2canvas from 'html2canvas'
+import { jsPDF } from 'jspdf'
+import { IoMdDownload } from 'react-icons/io'
+
 const SERIF = '"Times New Roman", Times, "Liberation Serif", serif'
 
 const toBullets = (text = '') =>
@@ -36,8 +41,8 @@ const Bullets = ({ text }) => {
     </ul>
   )
 }
-
 const ResumePreview = ({ data }) => {
+  const [isDownloading, setIsDownloading] = useState(false)
   const { personal, summary, skills } = data
   const skillList = skills.split(',').map((s) => s.trim()).filter(Boolean)
   const experience = data.experience.filter(hasContent)
@@ -57,11 +62,60 @@ const ResumePreview = ({ data }) => {
     )
   }
 
+  const handleDownloadPDF = async () => {
+    const input = document.getElementById('pdf-content')
+    if (!input) return
+
+    setIsDownloading(true)
+    try {
+      const canvas = await html2canvas(input, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+      })
+      const imageData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF('p', 'mm', 'a4')
+      const pageWidth = pdf.internal.pageSize.getWidth()
+      const pageHeight = pdf.internal.pageSize.getHeight()
+      const imageHeight = (canvas.height * pageWidth) / canvas.width
+      const pageCount = Math.ceil(imageHeight / pageHeight)
+
+      for (let page = 0; page < pageCount; page += 1) {
+        if (page > 0) pdf.addPage()
+        pdf.addImage(imageData, 'PNG', 0, -page * pageHeight, pageWidth, imageHeight)
+      }
+
+      const filename = personal.fullName
+        ? `${personal.fullName.trim().replace(/[^a-z0-9-_]+/gi, '-')}-resume.pdf`
+        : 'resume.pdf'
+      pdf.save(filename)
+    } catch (error) {
+      console.error('Failed to download resume PDF', error)
+      window.alert('Could not download the resume. Please try again.')
+    } finally {
+      setIsDownloading(false)
+    }
+  }
+
   return (
-    <article
-      className='mx-auto min-h-[820px] w-full bg-white px-8 py-10 text-black shadow-[0_2px_24px_rgba(0,0,0,0.12)] sm:px-12'
-      style={{ fontFamily: SERIF }}
-    >
+    <div className='mx-auto w-full'>
+      <div className='mb-3 flex justify-end'>
+        <button
+          type='button'
+          onClick={handleDownloadPDF}
+          disabled={isDownloading}
+          aria-label='Download resume as PDF'
+          className='inline-flex items-center gap-2 rounded-lg border border-black/15 bg-white px-3 py-2 text-sm font-medium text-black transition hover:bg-black/5 disabled:cursor-wait disabled:opacity-60'
+        >
+          <IoMdDownload size={18} />
+          {isDownloading ? 'Preparing PDF...' : 'Download PDF'}
+        </button>
+      </div>
+      <article
+        id='pdf-content'
+        className='mx-auto min-h-[820px] w-full bg-white px-8 py-10 text-black shadow-[0_2px_24px_rgba(0,0,0,0.12)] sm:px-12'
+        style={{ fontFamily: SERIF }}
+      >
       <header className='border-b-2 border-black pb-2 text-center'>
         {personal.fullName && (
           <h1 className='text-2xl font-bold uppercase tracking-[0.15em]'>{personal.fullName}</h1>
@@ -146,7 +200,8 @@ const ResumePreview = ({ data }) => {
           ))}
         </Section>
       )}
-    </article>
+      </article>
+    </div>
   )
 }
 

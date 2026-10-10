@@ -1,5 +1,5 @@
-import FormField from '../FormField'
-import { PERSONAL_FIELDS } from '../../../constants/resume'
+import FormField from './FormField'
+import { PERSONAL_FIELDS } from '../../constants/resume'
 
 const PersonalInfoStep = ({ data, form }) => (
   <div className='space-y-4'>

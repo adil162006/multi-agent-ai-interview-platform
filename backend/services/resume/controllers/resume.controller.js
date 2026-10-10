@@ -5,8 +5,9 @@ import redisClient from "../../../shared/redis/redis.js"
 import fs from "fs"
 
 export const uploadResume = async (req,res)=>{
+    let file
     try {
-        const file = req.file
+        file = req.file
         if(!file) return res.status(400).json({
             success:false,
             message:"resume pdf is required"
@@ -36,7 +37,7 @@ export const uploadResume = async (req,res)=>{
             })
         }
         await redisClient.set(`resume:${userId}`,JSON.stringify(resume))
-        await fs.unlink(file.path)
+        await fs.promises.unlink(file.path)
 
         return res.status(200).json({
             success:true,
@@ -45,7 +46,11 @@ export const uploadResume = async (req,res)=>{
         })
     } catch (error) {
         if(file){
-        await fs.unlinkSync(file.path)
+            try {
+                await fs.promises.unlink(file.path)
+            } catch (cleanupError) {
+                console.error("Failed to remove uploaded resume file", cleanupError)
+            }
         }
         console.error(error);
 

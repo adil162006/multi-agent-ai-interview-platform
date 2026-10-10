@@ -3,7 +3,7 @@ import Home from "./pages/Home";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Scorer from "./pages/Scorer";
-import ResumePreview from "./components/resume/ResumePreview";
+import Resume from "./pages/Resume";
 import { getCurrentUser } from "./apis/user.api";
 import { getResume } from "./apis/resume.api";
 import { useDispatch } from "react-redux";
@@ -81,7 +81,7 @@ function App() {
         path="/resume"
         element={
           user ? (
-            <ResumePreview />
+            <Resume />
           ) : (
             <Navigate to="/" replace />
           )
