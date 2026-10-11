@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setResume } from '../redux/resumeSlice'
 import { PolarAngleAxis, RadialBar, RadialBarChart } from 'recharts'
 import Navbar from '../components/Navbar'
+import { useCoins } from '../apis/user.api'
 
 
 const Tag = ({text, color}) => {
@@ -65,15 +66,25 @@ function Scorer({user,setUser}) {
         }
         try {
             setLoading(true);
+
+            const coinResponse = await useCoins({coins:10,action:"resume-scorer"})
+            setUser((prev)=>({
+                ...prev,
+                interviewCoin:coinResponse?.interviewCoin
+            }))
+
             const formData = new FormData();
             formData.append("resume",file)
             const response = await api.post("/api/resume/",formData)
+
             dispatch(setResume(response?.data?.data))
             console.log(response.data)
             setLoading(false)
         } catch (error) {
             console.log(error);
-            alert(error.response?.data?.message ?? "upload failed")
+            alert(error.response?.status === 403
+                ? "Low interview coins. Please purchase more."
+                : error.response?.data?.message ?? "upload failed")
             setLoading(false)
         }
     }
