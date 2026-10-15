@@ -166,3 +166,28 @@ export const submitAnswer = async(req,res)=>{
         })
     }
 }
+
+
+export const getinterview = async(req,res)=>{
+    try {
+        const userId = req.headers["x-user-id"]
+        const {id} = req.params
+        const interview = await  Interview.findOne({_id:id,userId})
+         if(!interview){
+            return res.startInterview(404).json({
+                success:false,
+                message:"interview  not found "
+            })
+        }
+        return res.status(200).json({
+            success:true,
+            interview
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success:false,
+            message:error.message
+        })
+    }
+}
