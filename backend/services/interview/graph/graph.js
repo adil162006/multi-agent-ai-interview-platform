@@ -1,6 +1,6 @@
 import { END, START, StateGraph } from "@langchain/langgraph";
-import { InterviewState } from "./state";
-import { feedbackNode, interviewNode, summaryNode } from "./nodes";
+import { InterviewState } from "./state.js";
+import { feedbackNode, interviewNode, summaryNode } from "./nodes.js";
 
 
 function router(state){
@@ -35,7 +35,7 @@ const graph = new StateGraph(InterviewState)
 })
 .addEdge(
     "interviewAgent",
-    End
+    END
 )
 .addConditionalEdges(
     "feedbackAgent",

@@ -1,12 +1,17 @@
-import { hrInterviewPrompt } from "../prompts/hrInterviewPrompt"
-import { technicalInterviewPrompt } from "../prompts/technicalInterviewPrompt"
-import { llm } from "../config/llm"
+import { hrInterviewPrompt } from "../prompts/hrInterviewPrompt.js"
+import { technicalInterviewPrompt } from "../prompts/technicalInterviewPrompt.js"
+import { llm } from "../config/llm.js"
 
 
 
 export const interviewAgent = async(data)=>{
     try {
-        const prompt = data?.type.toLowerCase() === "hr" ? hrInterviewPrompt(data) : technicalInterviewPrompt(data)
+        const type = typeof data?.type === "string" ? data.type.trim().toLowerCase() : ""
+        if (!type) {
+            throw new Error("Interview type is required to generate questions")
+        }
+
+        const prompt = type === "hr" ? hrInterviewPrompt(data) : technicalInterviewPrompt(data)
 
     const response = await llm.invoke(prompt)
 
@@ -14,9 +19,8 @@ export const interviewAgent = async(data)=>{
 
     return JSON.parse(clean)
     } catch (error) {
-        console.log(response.content);
-        console.log("failed to generate interview quesions");
-        
+        console.error("Failed to generate interview questions:", error)
+        throw error
     }
 
 

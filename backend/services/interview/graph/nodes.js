@@ -1,6 +1,6 @@
-import { feedbackAgent } from "../agents/feedback.agent";
+import { feedbackAgent } from "../agents/feedback.agent.js";
 import { interviewAgent } from "../agents/interview.agent.js";
-import { summaryAgent } from "../agents/summary.agent";
+import { summaryAgent } from "../agents/summary.agent.js";
 
 
 export async function interviewNode(state){

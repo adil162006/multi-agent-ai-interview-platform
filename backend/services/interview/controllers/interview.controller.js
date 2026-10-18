@@ -1,5 +1,5 @@
-import graph from "../graph/graph"
-import { Interview } from "../models/interview.model"
+import graph from "../graph/graph.js"
+import { Interview } from "../models/interview.model.js"
 
 
 
@@ -13,7 +13,7 @@ export const startInterview = async(req,res)=>{
             resume={}
         }=req.body
 
-        if(!type && role){
+        if(!type || !role){
             return res.status(400).json({
                 success:false,
                 message:"Interview type and role are required"
