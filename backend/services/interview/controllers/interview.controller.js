@@ -31,7 +31,7 @@ export const startInterview = async(req,res)=>{
         const questions = result.questions;
 
         if(!questions || questions.length===0){
-            return res.startInterview(400).json({
+            return res.status(400).json({
                 success:false,
                 message:"Failed to generate interview question"
             })
@@ -74,7 +74,7 @@ export const submitAnswer = async(req,res)=>{
         } = req.body
 
         if(!interviewId&& !answer){
-            return res.startInterview(400).json({
+            return res.status(400).json({
                 success:false,
                 message:"inerviewid and aswer are required"
             })
@@ -85,13 +85,13 @@ export const submitAnswer = async(req,res)=>{
         })
 
         if(!interview){
-            return res.startInterview(404).json({
+            return res.status(404).json({
                 success:false,
                 message:"interview  not found "
             })
         }
         if(interview.status=== "completed"){
-            return res.startInterview(400).json({
+            return res.status(400).json({
                 success:false,
                 message:"interview already completed"
             })
@@ -103,7 +103,7 @@ export const submitAnswer = async(req,res)=>{
         const currentQuestion = interview.questions[index]
 
         if(!currentQuestion){
-            return res.startInterview(400).json({
+            return res.status(400).json({
                 success:false,
                 message:"invalid question index"
             })
@@ -174,7 +174,7 @@ export const getinterview = async(req,res)=>{
         const {id} = req.params
         const interview = await  Interview.findOne({_id:id,userId})
          if(!interview){
-            return res.startInterview(404).json({
+            return res.status(404).json({
                 success:false,
                 message:"interview  not found "
             })
