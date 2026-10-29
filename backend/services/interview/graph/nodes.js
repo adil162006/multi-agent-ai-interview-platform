@@ -28,7 +28,7 @@ export async function feedbackNode(state){
 }
 
 export async function summaryNode(state){
-    const report = await reportAgent({
+    const report = await summaryAgent({
         role:state.role,
         type:state.type,
         questions: state.questions,

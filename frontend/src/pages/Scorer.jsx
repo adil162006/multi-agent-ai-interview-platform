@@ -7,7 +7,9 @@ import { setResume } from '../redux/resumeSlice'
 import { PolarAngleAxis, RadialBar, RadialBarChart } from 'recharts'
 import Navbar from '../components/Navbar'
 import { useCoins } from '../apis/user.api'
+import toast from 'react-hot-toast'
 
+const RESUME_SCORER_COIN_COST = 10
 
 const Tag = ({text, color}) => {
     const styles = {
@@ -61,16 +63,29 @@ function Scorer({user,setUser}) {
     const {resume}=useSelector((state)=>state.resume)
     const uploadResume = async () => {
         if(!file){
-            alert("please select a pdf ")
+            toast.error('Please select a resume to analyse.')
             return
         }
         try {
             setLoading(true);
 
-            const coinResponse = await useCoins({coins:10,action:"resume-scorer"})
+            if (Number(user?.interviewCoin ?? 0) < RESUME_SCORER_COIN_COST) {
+                toast.error(`You need ${RESUME_SCORER_COIN_COST} interview coins to score a resume.`)
+                return
+            }
+
+            const coinResponse = await useCoins({
+                coins: RESUME_SCORER_COIN_COST,
+                action:"resume-scorer"
+            })
+            if (!coinResponse?.success) {
+                toast.error(coinResponse?.message || 'Unable to use interview coins. Please try again.')
+                return
+            }
+
             setUser((prev)=>({
                 ...prev,
-                interviewCoin:coinResponse?.interviewCoin
+                interviewCoin:coinResponse.interviewCoin
             }))
 
             const formData = new FormData();
@@ -79,12 +94,10 @@ function Scorer({user,setUser}) {
 
             dispatch(setResume(response?.data?.data))
             console.log(response.data)
-            setLoading(false)
         } catch (error) {
             console.log(error);
-            alert(error.response?.status === 403
-                ? "Low interview coins. Please purchase more."
-                : error.response?.data?.message ?? "upload failed")
+            toast.error(error.response?.data?.message ?? 'Resume analysis failed. Please try again.')
+        } finally {
             setLoading(false)
         }
     }

@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setResume } from '../../redux/resumeSlice'
 import api from '../../utils/axios'
 import { startInterview } from '../../apis/interview.api'
+import toast from 'react-hot-toast'
 
 const benefits = [
   'Personalized AI Questions',
@@ -14,6 +15,8 @@ const benefits = [
   'Detailed Performance Report',
   'Real Interview Experience',
 ]
+
+const INTERVIEW_COIN_COST = 50
 
 function Step1setup({ user, setUser }) {
   const navigate = useNavigate()
@@ -62,6 +65,13 @@ function Step1setup({ user, setUser }) {
         }
     }
     const start = async()=>{
+        if (starting) return
+        const availableCoins = Number(user?.interviewCoin ?? 0)
+        if (!Number.isFinite(availableCoins) || availableCoins < INTERVIEW_COIN_COST) {
+            toast.error(`You need ${INTERVIEW_COIN_COST} interview coins to start an interview.`)
+            return
+        }
+
         setStarting(true)
         try {
             const response = await startInterview({
@@ -70,18 +80,28 @@ function Step1setup({ user, setUser }) {
                 useResume,
                 resume
             })
-            if(response){
-                 const coinResponse = await useCoins({coins:50,action:"interview"})
+            if (!response?.success || !response?.interviewId) {
+                toast.error(response?.message || 'Unable to create the interview. Please try again.')
+                return
+            }
+
+            const coinResponse = await useCoins({
+                coins: INTERVIEW_COIN_COST,
+                action: "interview"
+            })
+            if (!coinResponse?.success) {
+                toast.error(coinResponse?.message || 'Unable to use interview coins. Please try again.')
+                return
+            }
+
             setUser((prev)=>({
                 ...prev,
                 interviewCoin:coinResponse?.interviewCoin
             }))
-
-            }
             navigate(`/interview/${response.interviewId}`)
-
         } catch (error) {
             console.log(error)
+            toast.error('Unable to create the interview. Please try again.')
         }finally{
             setStarting(false)
 
@@ -299,12 +319,12 @@ function Step1setup({ user, setUser }) {
             <motion.button
             onClick={start}
               type="button"
-              disabled={!canStart}
-              whileHover={canStart ? { scale: 1.015 } : undefined}
-              whileTap={canStart ? { scale: 0.985 } : undefined}
+              disabled={!canStart || starting}
+              whileHover={canStart && !starting ? { scale: 1.015 } : undefined}
+              whileTap={canStart && !starting ? { scale: 0.985 } : undefined}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-white px-5 py-3.5 text-sm font-semibold text-[#101116] transition hover:bg-gray-200 disabled:cursor-not-allowed disabled:bg-gray-500 disabled:text-gray-900"
             >
-              Start Interview
+              {starting ? 'Starting Interview...' : 'Start Interview'}
               <ArrowRight size={17} />
             </motion.button>
           </div>

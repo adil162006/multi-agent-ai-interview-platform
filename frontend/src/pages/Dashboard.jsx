@@ -1,7 +1,9 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import Sidebar from '../components/Sidebar'
 import { useNavigate } from 'react-router-dom'
 import api from '../utils/axios'
+import { useCoins } from '../apis/user.api'
+import toast from 'react-hot-toast'
 import { motion } from 'motion/react'
 import { FiMenu } from 'react-icons/fi'
 import {
@@ -112,6 +114,38 @@ function Dashboard({ user, setUser }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const navigate = useNavigate()
+  const resumeChargeInProgress = useRef(false)
+
+  const handleResumeBuilderClick = async () => {
+    if (resumeChargeInProgress.current) return false
+
+    const availableCoins = Number(user?.interviewCoin ?? 0)
+    if (!Number.isFinite(availableCoins) || availableCoins < 10) {
+      toast.error('You need 10 interview coins to create a resume.')
+      return false
+    }
+
+    resumeChargeInProgress.current = true
+    try {
+      const response = await useCoins({ coins: 10, action: 'resume-builder' })
+      if (!response?.success) {
+        toast.error(response?.message || 'Unable to use interview coins. Please try again.')
+        return false
+      }
+
+      setUser((currentUser) => ({
+        ...currentUser,
+        interviewCoin: response.interviewCoin,
+      }))
+      return true
+    } catch (error) {
+      console.error('Failed to use coins for resume creation:', error)
+      toast.error('Unable to create a resume. Please try again.')
+      return false
+    } finally {
+      resumeChargeInProgress.current = false
+    }
+  }
 
   const handleLogout = async () => {
     try {
@@ -130,6 +164,7 @@ function Dashboard({ user, setUser }) {
       <Sidebar
         user={user}
         onNewInterview={() => navigate('/interview')}
+        onResumeBuilder={handleResumeBuilderClick}
         onLogout={handleLogout}
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}

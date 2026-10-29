@@ -11,6 +11,7 @@ import { setResume } from "./redux/resumeSlice";
 import InterviewStart from "./pages/InterviewStart";
 import InterviewPage from "./pages/InterviewPage";
 import InterviewReport from "./pages/InterviewReport";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   const dispatch = useDispatch()
@@ -48,6 +49,8 @@ function App() {
   }
 
   return (
+    <>
+    <Toaster position="top-right" />
     <Routes>
       <Route
         path="/"
@@ -121,6 +124,7 @@ function App() {
         }
       />
     </Routes>
+    </>
   );
 }
 

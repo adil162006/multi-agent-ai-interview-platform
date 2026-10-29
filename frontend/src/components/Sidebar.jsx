@@ -1,6 +1,6 @@
 import React from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { GiArtificialHive } from 'react-icons/gi'
 import { TbLayoutSidebar } from 'react-icons/tb'
 import { FiPlus, FiGrid, FiFileText, FiMap, FiStar, FiLogOut, FiX } from 'react-icons/fi'
@@ -21,12 +21,23 @@ const EXPANDED = 260
 const COLLAPSED = 72
 
 // ---- single nav item ----
-function NavItem({ item, collapsed, onClick }) {
+function NavItem({ item, collapsed, onClick, onResumeBuilder }) {
   const Icon = item.icon
+  const { pathname } = useLocation()
+  const navigate = useNavigate()
+
   return (
     <NavLink
       to={item.to}
-      onClick={onClick}
+      onClick={async (event) => {
+        if (item.to === '/resume' && onResumeBuilder && pathname !== item.to) {
+          event.preventDefault()
+          const canOpenResumeBuilder = await onResumeBuilder()
+          if (!canOpenResumeBuilder) return
+          navigate(item.to)
+        }
+        onClick?.()
+      }}
       title={collapsed ? item.label : undefined}
       className={({ isActive }) =>
         `flex items-center gap-3 rounded-xl text-sm transition-colors ${
@@ -49,6 +60,7 @@ function SidebarContent({
   user,
   collapsed,
   onNewInterview,
+  onResumeBuilder,
   onLogout,
   onToggle,
   onNavigate,
@@ -128,7 +140,12 @@ function SidebarContent({
       {/* nav */}
       <nav className='flex-1 overflow-y-auto px-3 pt-5 flex flex-col gap-1'>
         {mainLinks.map((item) => (
-          <NavItem key={item.to} item={item} collapsed={collapsed} onClick={onNavigate} />
+          <NavItem
+            key={item.to}
+            item={item}
+            collapsed={collapsed}
+            onClick={onNavigate}
+          />
         ))}
 
         {!collapsed ? (
@@ -140,7 +157,13 @@ function SidebarContent({
         )}
 
         {agentLinks.map((item) => (
-          <NavItem key={item.to} item={item} collapsed={collapsed} onClick={onNavigate} />
+          <NavItem
+            key={item.to}
+            item={item}
+            collapsed={collapsed}
+            onClick={onNavigate}
+            onResumeBuilder={onResumeBuilder}
+          />
         ))}
       </nav>
 
@@ -227,6 +250,7 @@ function SidebarContent({
 function Sidebar({
     user,
     onNewInterview,
+    onResumeBuilder,
     onLogout,
     sidebarOpen,
     setSidebarOpen,
@@ -246,6 +270,7 @@ function Sidebar({
           user={user}
           collapsed={!sidebarOpen}
           onNewInterview={onNewInterview}
+          onResumeBuilder={onResumeBuilder}
           onLogout={onLogout}
           onToggle={() => setSidebarOpen(!sidebarOpen)}
         />
@@ -278,6 +303,7 @@ function Sidebar({
                 collapsed={false}
                 isMobile
                 onNewInterview={onNewInterview}
+                onResumeBuilder={onResumeBuilder}
                 onLogout={onLogout}
                 onToggle={() => setMobileOpen(false)}
                 onNavigate={() => setMobileOpen(false)}

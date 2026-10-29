@@ -25,6 +25,12 @@ export const getInterview =async(id)=>{
 }
 
 export const submitInterviewAnswer = async(interviewId, answer)=>{
-    const response = await api.post("/api/interview/answer", { interviewId, answer })
-    return response.data
+    try {
+        const response = await api.post("/api/interview/answer", { interviewId, answer })
+        console.log(response.data)
+        return response.data
+    } catch (error) {
+        console.log(error)
+        return null
+    }
 }
