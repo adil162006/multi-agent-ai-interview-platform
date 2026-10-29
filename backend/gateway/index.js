@@ -24,6 +24,7 @@ const PORT = process.env.PORT
 
 app.use("/api/auth",proxy((process.env.AUTH_SERVICE_URL)))
 app.use("/api/resume",isAuth,proxyWithHeaders((process.env.RESUME_SERVICE_URL)))
+app.use("/api/interview",isAuth,proxyWithHeaders((process.env.INTERVIEW_SERVICE_URL)))
 app.get("/api/me",isAuth,getCurrentUser)
 app.listen(PORT,()=>{
     console.log(`gateway server running on ${PORT}`)

@@ -8,6 +8,10 @@ import { getCurrentUser } from "./apis/user.api";
 import { getResume } from "./apis/resume.api";
 import { useDispatch } from "react-redux";
 import { setResume } from "./redux/resumeSlice";
+import InterviewStart from "./pages/InterviewStart";
+import InterviewPage from "./pages/InterviewPage";
+import InterviewReport from "./pages/InterviewReport";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   const dispatch = useDispatch()
@@ -45,6 +49,8 @@ function App() {
   }
 
   return (
+    <>
+    <Toaster position="top-right" />
     <Routes>
       <Route
         path="/"
@@ -87,7 +93,38 @@ function App() {
           )
         }
       />
+      <Route
+        path="/interview"
+        element={
+          user ? (
+            <InterviewStart user={user} setUser={setUser}/>
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
+      />
+      <Route
+        path="/interview/:id"
+        element={
+          user ? (
+            < InterviewPage user={user} setUser={setUser}/>
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
+      />
+      <Route
+        path="/interview/:id/report"
+        element={
+          user ? (
+            < InterviewReport  user={user} setUser={setUser}/>
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
+      />
     </Routes>
+    </>
   );
 }
 
