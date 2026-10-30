@@ -1,6 +1,6 @@
 import express from "express";
-import { connectDb } from "./config/db.js";
-import { ENV } from "./config/env.js";
+import { connectDb } from "./configs/db.js";
+import { ENV } from "./configs/env.js";
 
 
 const app = express()
