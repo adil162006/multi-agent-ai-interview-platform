@@ -1,119 +1,83 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Sidebar from '../components/Sidebar'
+import RadarCard from '../components/dashboard/RadarCard'
+import StatCard from '../components/dashboard/StatCard'
 import { useNavigate } from 'react-router-dom'
 import api from '../utils/axios'
 import { useCoins } from '../apis/user.api'
 import toast from 'react-hot-toast'
 import { motion } from 'motion/react'
 import { FiMenu } from 'react-icons/fi'
-import {
-  Radar,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  ResponsiveContainer,
-} from 'recharts'
-
-/* ---------- SAMPLE DATA (replace with API data later) ---------- */
-const statsData = [
-  { label: 'Total Interviews', value: 21, badge: 'All Time', sub: 'Interviews Created' },
-  { label: 'Questions Solved', value: 126, badge: 'Answered', sub: 'Across All Interviews' },
-  { label: 'Completed', value: 15, badge: '21 Total', sub: 'Interviews Finished' },
-  { label: 'Average Score', value: '23/100', badge: 'Completed Only', sub: 'Average Performance', subBelow: true },
-]
-
-const technicalData = [
-  { skill: 'Correctness', score: 8 },
-  { skill: 'Clarity', score: 7 },
-  { skill: 'Relevance', score: 9 },
-  { skill: 'Detail', score: 6 },
-  { skill: 'Efficiency', score: 7 },
-  { skill: 'Communication', score: 8 },
-  { skill: 'Problem solving', score: 9 },
-  { skill: 'Creativity', score: 6 },
-]
-
-const hrData = [
-  { skill: 'Correctness', score: 7 },
-  { skill: 'Clarity', score: 8 },
-  { skill: 'Relevance', score: 9 },
-  { skill: 'Detail', score: 7 },
-  { skill: 'Efficiency', score: 8 },
-  { skill: 'Communication', score: 9 },
-  { skill: 'Problem solving', score: 8 },
-  { skill: 'Creativity', score: 7 },
-]
-
-const historyCharts = [
-  { title: 'Technical Interviews', count: 13, data: technicalData },
-  { title: 'HR Interviews', count: 2, data: hrData },
-]
-
-/* ---------- SMALL COMPONENTS ---------- */
-function StatCard({ label, value, badge, sub, subBelow, index }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.08 }}
-      className='rounded-2xl bg-gradient-to-b from-[#1c1c1c] to-[#0f0f0f] border border-white/5 shadow-xl shadow-black/20 p-5 md:p-6 flex flex-col gap-2'
-    >
-      <p className='text-[11px] md:text-xs font-semibold uppercase tracking-wider text-white/50'>
-        {label}
-      </p>
-      <h3 className='text-white text-2xl md:text-3xl font-bold tracking-tight'>{value}</h3>
-
-      <div className={`flex ${subBelow ? 'flex-col items-start' : 'items-center flex-wrap'} gap-1.5`}>
-        <span className='px-2 py-0.5 rounded-md bg-white/10 text-white/80 text-[10px] md:text-[11px] font-semibold'>
-          {badge}
-        </span>
-        <span className='text-white/40 text-[11px] md:text-xs'>{sub}</span>
-      </div>
-    </motion.div>
-  )
-}
-
-function RadarCard({ title, count, data, index }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
-      className='rounded-2xl bg-gradient-to-b from-[#1c1c1c] to-[#0f0f0f] border border-white/5 shadow-xl shadow-black/20 p-4 md:p-6 flex flex-col'
-    >
-      <div className='w-full h-[260px] sm:h-[300px] md:h-[320px]'>
-        <ResponsiveContainer width='100%' height='100%'>
-          <RadarChart data={data} outerRadius='65%'>
-            <PolarGrid stroke='rgba(255,255,255,0.12)' />
-            <PolarAngleAxis
-              dataKey='skill'
-              tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 11 }}
-            />
-            <PolarRadiusAxis domain={[0, 10]} tick={false} axisLine={false} />
-            <Radar
-              dataKey='score'
-              stroke='#e5e5e5'
-              strokeWidth={2}
-              fill='#ffffff'
-              fillOpacity={0.12}
-            />
-          </RadarChart>
-        </ResponsiveContainer>
-      </div>
-
-      <p className='text-white text-center text-sm md:text-base font-semibold mt-2'>
-        {title} ({count})
-      </p>
-    </motion.div>
-  )
-}
+import { getAllInterviews } from '../apis/interview.api'
 
 /* ---------- PAGE ---------- */
 function Dashboard({ user, setUser }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [dashboardError, setDashboardError] = useState('')
+  const [refreshKey, setRefreshKey] = useState(0)
+  const [stats, setStats] = useState({
+    totalInterviews: 0,
+    totalQuestions: 0,
+    completed: 0,
+    averageScore: 0,
+  })
+
+  const [technicalData,setTechnicalData] = useState([])
+  const [hrData,setHrData] = useState([])
+  const [technicalCount,setTechnicalCount] = useState(0)
+  const [hrCount,setHrCount] = useState(0)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    let isActive = true
+
+    const fetchInterview = async () => {
+      setIsLoading(true)
+      setDashboardError('')
+
+      const response = await getAllInterviews()
+      if (!isActive) return
+
+      if (!response?.success || !response.stats) {
+        setDashboardError(response?.message || 'Unable to load dashboard data. Please try again.')
+        setIsLoading(false)
+        return
+      }
+
+      setStats({
+        totalInterviews: response.stats.totalInterviews ?? 0,
+        totalQuestions: response.stats.totalQuestions ?? 0,
+        completed: response.stats.completed ?? 0,
+        averageScore: response.stats.averageScore ?? 0,
+      })
+      setTechnicalData(Array.isArray(response.technicalData) ? response.technicalData : [])
+      setHrData(Array.isArray(response.hrData) ? response.hrData : [])
+      setTechnicalCount(response.technicalCount ?? 0)
+      setHrCount(response.hrCount ?? 0)
+      setIsLoading(false)
+    }
+
+    fetchInterview()
+
+    return () => {
+      isActive = false
+    }
+  }, [refreshKey])
+
+  const statsData = [
+    { label: 'Total Interviews', value: isLoading || dashboardError ? '—' : stats.totalInterviews, badge: 'All Time', sub: 'Interviews Created' },
+    { label: 'Questions Asked', value: isLoading || dashboardError ? '—' : stats.totalQuestions, badge: 'All Interviews', sub: 'Across All Interviews' },
+    { label: 'Completed', value: isLoading || dashboardError ? '—' : stats.completed, badge: `${stats.totalInterviews} Total`, sub: 'Interviews Finished' },
+    { label: 'Average Score', value: isLoading || dashboardError ? '—' : `${stats.averageScore}/100`, badge: 'Completed Only', sub: 'Average Performance', subBelow: true },
+  ]
+
+  const historyCharts = [
+    { title: 'Technical Interviews', count: technicalCount, data: technicalData },
+    { title: 'HR Interviews', count: hrCount, data: hrData },
+  ]
+
   const resumeChargeInProgress = useRef(false)
 
   const handleResumeBuilderClick = async () => {
@@ -219,9 +183,28 @@ function Dashboard({ user, setUser }) {
             Interview History
           </h3>
 
+          {dashboardError && (
+            <div className='mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700'>
+              <span>{dashboardError}</span>
+              <button
+                type='button'
+                onClick={() => setRefreshKey((key) => key + 1)}
+                className='font-semibold underline underline-offset-2'
+              >
+                Try again
+              </button>
+            </div>
+          )}
+
           <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
             {historyCharts.map((chart, i) => (
-              <RadarCard key={chart.title} index={i} {...chart} />
+              <RadarCard
+                key={chart.title}
+                index={i}
+                isLoading={isLoading}
+                hasError={Boolean(dashboardError)}
+                {...chart}
+              />
             ))}
           </div>
         </section>

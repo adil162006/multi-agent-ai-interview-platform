@@ -1,5 +1,6 @@
 import graph from "../graph/graph.js"
 import { Interview } from "../models/interview.model.js"
+import redisClient from "../../../shared/redis/redis.js"
 
 
 
@@ -138,6 +139,9 @@ export const submitAnswer = async(req,res)=>{
             interview.weaknesses = result.report.weaknesses
             interview.recommendations = result.report.recommendations
             await interview.save()
+
+            // Invalidate cached interview data
+            await redisClient.del(`interview:${userId}`);
          return res.status(200).json({
             success:true,
             completed:true,
@@ -193,3 +197,128 @@ export const getinterview = async(req,res)=>{
         })
     }
 }
+
+
+
+export const getAllInterview = async (req, res) => {
+    try {
+        const userId = req.headers["x-user-id"];
+
+        const cache = await redisClient.get(`interview:${userId}`);
+
+        if (cache) {
+            console.log("served from redis");
+            return res.status(200).json(JSON.parse(cache));
+        }
+
+        const interviews = await Interview.find({ userId }).sort({ createdAt: -1 });
+
+        const completed = interviews.filter(
+            (item) => item.status === "completed"
+        );
+
+        const totalQuestions = interviews.reduce(
+            (sum, item) => sum + item.questions.length, 0
+        );
+
+        const averageScore = completed.length > 0
+            ? Number(
+                (
+                    completed.reduce((sum, item) => sum + item.overallScore, 0) /
+                    completed.length
+                ).toFixed(1)
+            )
+            : 0;
+
+        const stats = {
+            totalInterviews: interviews.length,
+            totalQuestions,
+            completed: completed.length,
+            averageScore
+        };
+
+        const getAverageData = (list) => {
+            const total = {
+                correctness: 0,
+                clarity: 0,
+                relevance: 0,
+                detail: 0,
+                efficiency: 0,
+                communication: 0,
+                problemSolving: 0,
+                creativity: 0
+            };
+
+            let count = 0;
+
+            list.forEach((interview) => {
+                interview.questions.forEach((q) => {
+                    const feedback = q.feedback || {};
+
+                    total.correctness += feedback.correctness || 0;
+                    total.clarity += feedback.clarity || 0;
+                    total.relevance += feedback.relevance || 0;
+                    total.detail += feedback.detail || 0;
+                    total.efficiency += feedback.efficiency || 0;
+                    total.communication += feedback.communication || 0;
+                    total.problemSolving += feedback.problemSolving || 0;
+                    total.creativity += feedback.creativity || 0;
+
+                    count++;
+                });
+            });
+
+            return [
+                { skill: "Correctness", score: count ? Math.round(total.correctness / count) : 0 },
+                { skill: "Clarity", score: count ? Math.round(total.clarity / count) : 0 },
+                { skill: "Relevance", score: count ? Math.round(total.relevance / count) : 0 },
+                { skill: "Detail", score: count ? Math.round(total.detail / count) : 0 },
+                { skill: "Efficiency", score: count ? Math.round(total.efficiency / count) : 0 },
+                { skill: "Communication", score: count ? Math.round(total.communication / count) : 0 },
+                { skill: "Problem Solving", score: count ? Math.round(total.problemSolving / count) : 0 },
+                { skill: "Creativity", score: count ? Math.round(total.creativity / count) : 0 }
+            ];
+        };
+
+        const technicalInterview = completed.filter(
+            (item) => item.type === "technical"
+        );
+
+        const hrInterview = completed.filter(
+            (item) => item.type === "hr"
+        );
+
+        const technicalData = getAverageData(technicalInterview);
+        const hrData = getAverageData(hrInterview);
+
+        const technicalCount = technicalInterview.length;
+        const hrCount = hrInterview.length;
+
+        const payload = {
+            success: true,
+            interviews,
+            stats,
+            technicalData,
+            hrData,
+            technicalCount,
+            hrCount
+        };
+
+        await redisClient.set(
+            `interview:${userId}`,
+            JSON.stringify(payload),
+            "EX",
+            600
+        );
+
+        return res.status(200).json(payload);
+
+    } catch (error) {
+        console.log(error);
+
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
