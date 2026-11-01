@@ -75,7 +75,7 @@ export const resourceAgent = async (state) => {
                 return {
                     ...module,
                     youtube: video?.url || "",
-                    article: docsmap.get(module.title.toLowerCase()) || ""
+                    articles: docsmap.get(module.title.toLowerCase()) || ""
                 };
             })
         );

@@ -12,6 +12,8 @@ import InterviewStart from "./pages/InterviewStart";
 import InterviewPage from "./pages/InterviewPage";
 import InterviewReport from "./pages/InterviewReport";
 import { Toaster } from "react-hot-toast";
+import Roadmap from "./pages/Roadmap";
+import ShowRoadmap from "./pages/ShowRoadmap";
 
 function App() {
   const dispatch = useDispatch()
@@ -118,6 +120,27 @@ function App() {
         element={
           user ? (
             < InterviewReport  user={user} setUser={setUser}/>
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
+      />
+      <Route
+        path="/roadmap"
+        element={
+          user ? (
+            < Roadmap  user={user} setUser={setUser}/>
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
+      />
+      <Route path="/roadmap-builder" element={<Navigate to="/roadmap" replace />} />
+      <Route
+        path="/roadmap/show/:id"
+        element={
+          user ? (
+            <ShowRoadmap />
           ) : (
             <Navigate to="/" replace />
           )

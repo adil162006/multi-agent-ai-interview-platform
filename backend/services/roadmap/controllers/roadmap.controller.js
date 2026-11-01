@@ -1,5 +1,5 @@
-import { graph } from "../graph/roadmap.graph";
-import { Roadmap } from "../models/roadmap.model";
+import { graph } from "../graph/roadmap.graph.js";
+import { Roadmap } from "../models/roadmap.model.js";
 import redisClient from "../../../shared/redis/redis.js"
 
 
