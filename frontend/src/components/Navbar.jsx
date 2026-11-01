@@ -4,7 +4,7 @@ const Navbar = ({ label, action }) => {
   const navigate = useNavigate()
 
   return (
-    <nav className='fixed inset-x-0 top-0 border-b border-black/8 bg-white/8 backdrop-blur-xl'>
+    <nav className='fixed inset-x-0 top-0 z-50 border-b border-black/8 bg-white/8 backdrop-blur-xl'>
       <div className='mx-auto flex h-12 max-w-7xl items-center justify-between px-3 sm:px-5'>
         <button
           type='button'
