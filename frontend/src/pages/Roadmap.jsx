@@ -12,8 +12,9 @@ import {
 import { FaRocket } from 'react-icons/fa'
 import Navbar from '../components/Navbar'
 import { useCoins } from '../apis/user.api'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import api from '../utils/axios'
+import { updateUser } from '../redux/userSlice'
 
 
 const PACKAGE_OPTIONS = [
@@ -30,8 +31,9 @@ const ROLE_OPTIONS = [
     { label: 'ML Engineer', value: 'Machine Learning Engineer' }
 ];
 
-function Roadmap({user,setUser}) {
+function Roadmap() {
     const navigate = useNavigate()
+    const dispatch = useDispatch()
     const[historyOpen,setHistoryOpen] =useState(false);
     const[roadmap,setRoadmap] = useState(null);
     const [role,setRole] = useState(null);
@@ -77,10 +79,9 @@ function Roadmap({user,setUser}) {
         try {
             try {
                 const coinResponse = await useCoins({coins:20,action:"roadmap-builder"})
-            setUser((prev)=>({
-                ...prev,
-                interviewCoin:coinResponse?.interviewCoin
-            }))
+            if (coinResponse?.success) {
+                dispatch(updateUser({ interviewCoin: coinResponse.interviewCoin }))
+            }
             } catch (error) {
                alert("Failed to reduce coin") 
             }

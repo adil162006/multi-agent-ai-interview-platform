@@ -117,7 +117,7 @@ export const submitAnswer = async(req,res)=>{
 
         const result = await graph.invoke({
             action:"feedback",
-            question : currentQuestion.length,
+            question : currentQuestion.question,
             answer,
             difficulty: currentQuestion.difficulty,
             completed,

@@ -1,11 +1,23 @@
-import { useNavigate } from 'react-router-dom'
+import { FiMenu } from 'react-icons/fi'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 
 const Navbar = ({ label, action }) => {
   const navigate = useNavigate()
+  const { openMobileSidebar, sidebarOpen } = useOutletContext()
 
   return (
-    <nav className='fixed inset-x-0 top-0 z-50 border-b border-black/8 bg-white/8 backdrop-blur-xl'>
-      <div className='mx-auto flex h-12 max-w-7xl items-center justify-between px-3 sm:px-5'>
+    <nav className={`fixed inset-x-0 top-0 z-50 border-b border-black/8 bg-white/8 backdrop-blur-xl ${
+      sidebarOpen ? 'md:left-[260px]' : 'md:left-[72px]'
+    }`}>
+      <div className='mx-auto flex h-12 max-w-7xl items-center justify-between px-3 pl-14 md:px-5 md:pl-5'>
+        <button
+          type='button'
+          onClick={openMobileSidebar}
+          aria-label='Open menu'
+          className='absolute left-3 flex h-9 w-9 items-center justify-center rounded-lg border border-black/10 bg-white text-black/70 shadow-sm md:hidden'
+        >
+          <FiMenu size={18} />
+        </button>
         <button
           type='button'
           onClick={() => navigate('/dashboard')}

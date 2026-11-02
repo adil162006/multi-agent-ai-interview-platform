@@ -1,19 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react'
-import Sidebar from '../components/Sidebar'
+import React, { useEffect, useState } from 'react'
 import RadarCard from '../components/dashboard/RadarCard'
 import StatCard from '../components/dashboard/StatCard'
-import { useNavigate } from 'react-router-dom'
-import api from '../utils/axios'
-import { useCoins } from '../apis/user.api'
-import toast from 'react-hot-toast'
+import { useOutletContext } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import { motion } from 'motion/react'
 import { FiMenu } from 'react-icons/fi'
 import { getAllInterviews } from '../apis/interview.api'
 
 /* ---------- PAGE ---------- */
-function Dashboard({ user, setUser }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [mobileOpen, setMobileOpen] = useState(false)
+function Dashboard() {
+  const user = useSelector((state) => state.user.user)
+  const { openMobileSidebar } = useOutletContext()
   const [isLoading, setIsLoading] = useState(true)
   const [dashboardError, setDashboardError] = useState('')
   const [refreshKey, setRefreshKey] = useState(0)
@@ -28,8 +25,6 @@ function Dashboard({ user, setUser }) {
   const [hrData,setHrData] = useState([])
   const [technicalCount,setTechnicalCount] = useState(0)
   const [hrCount,setHrCount] = useState(0)
-  const navigate = useNavigate()
-
   useEffect(() => {
     let isActive = true
 
@@ -78,75 +73,17 @@ function Dashboard({ user, setUser }) {
     { title: 'HR Interviews', count: hrCount, data: hrData },
   ]
 
-  const resumeChargeInProgress = useRef(false)
-
-  const handleResumeBuilderClick = async () => {
-    if (resumeChargeInProgress.current) return false
-
-    const availableCoins = Number(user?.interviewCoin ?? 0)
-    if (!Number.isFinite(availableCoins) || availableCoins < 10) {
-      toast.error('You need 10 interview coins to create a resume.')
-      return false
-    }
-
-    resumeChargeInProgress.current = true
-    try {
-      const response = await useCoins({ coins: 10, action: 'resume-builder' })
-      if (!response?.success) {
-        toast.error(response?.message || 'Unable to use interview coins. Please try again.')
-        return false
-      }
-
-      setUser((currentUser) => ({
-        ...currentUser,
-        interviewCoin: response.interviewCoin,
-      }))
-      return true
-    } catch (error) {
-      console.error('Failed to use coins for resume creation:', error)
-      toast.error('Unable to create a resume. Please try again.')
-      return false
-    } finally {
-      resumeChargeInProgress.current = false
-    }
-  }
-
-  const handleLogout = async () => {
-    try {
-      const response = await api.post('/api/auth/logout')
-      if (response.data.success) {
-        setUser(null)
-        navigate('/')
-      }
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
   return (
     <div className='bg-white min-h-screen font-sans flex text-[#0a0a0a]'>
-      <Sidebar
-        user={user}
-        onNewInterview={() => navigate('/interview')}
-        onResumeBuilder={handleResumeBuilderClick}
-        onLogout={handleLogout}
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-        mobileOpen={mobileOpen}
-        setMobileOpen={setMobileOpen}
-      />
-
       <motion.main
-        className={`flex flex-col flex-1 min-w-0 min-h-screen px-3 sm:px-4 md:px-6 py-4 md:py-6 transition-[margin] duration-300 ${
-          sidebarOpen ? 'md:ml-[260px]' : 'md:ml-[72px]'
-        }`}
+        className='flex flex-col flex-1 min-w-0 min-h-screen px-3 sm:px-4 md:px-6 py-4 md:py-6'
       >
         {/* top area */}
         <div className='flex items-center justify-between pb-5 md:pb-6 border-b border-black/10'>
           <div className='flex items-center gap-2.5'>
             {/* mobile menu button (opens sidebar drawer) */}
             <motion.button
-              onClick={() => setMobileOpen(true)}
+              onClick={openMobileSidebar}
               whileTap={{ scale: 0.92 }}
               aria-label='Open menu'
               className='md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-black/10 text-[#0a0a0a] shadow-md shadow-black/10 cursor-pointer'

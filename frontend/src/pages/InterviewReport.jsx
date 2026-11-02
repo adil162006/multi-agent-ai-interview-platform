@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Step3report from '../components/interterview/Step3report'
 import { getInterview } from '../apis/interview.api';
 import { useNavigate, useParams } from 'react-router-dom';
-function InterviewReport({user,setUser}) {
+function InterviewReport() {
   const {id} = useParams();
   const[loading,setLoading] = useState(true);
   const [report,setReport] = useState(null);
@@ -36,13 +36,7 @@ function InterviewReport({user,setUser}) {
   if(!report) return <div className="flex min-h-screen items-center justify-center bg-[#f7f7f5] text-sm text-gray-500">Unable to load this interview report.</div>;
   return (
     <div>
-      <Step3report
-      user={user}
-      setUser={setUser}
-      report={report}
-
-
-      />
+      <Step3report report={report} />
     </div>
   )
 }
