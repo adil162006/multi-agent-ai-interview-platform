@@ -5,6 +5,7 @@ import { GiArtificialHive } from 'react-icons/gi'
 import { TbLayoutSidebar } from 'react-icons/tb'
 import { FiPlus, FiGrid, FiFileText, FiMap, FiStar, FiLogOut, FiX } from 'react-icons/fi'
 import { HiSparkles } from 'react-icons/hi2'
+import { useSelector } from 'react-redux'
 
 // ---- menu config ----
 const mainLinks = [
@@ -248,7 +249,6 @@ function SidebarContent({
 }
 
 function Sidebar({
-    user,
     onNewInterview,
     onResumeBuilder,
     onLogout,
@@ -257,6 +257,7 @@ function Sidebar({
     mobileOpen,
     setMobileOpen
 }) {
+  const user = useSelector((state) => state.user.user)
   return (
     <>
       {/* desktop sidebar */}

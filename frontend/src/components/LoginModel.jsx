@@ -3,8 +3,9 @@ import { motion } from "motion/react";
 import { FaGoogle, FaTimes } from "react-icons/fa";
 import { signInWithPopup } from 'firebase/auth'
 import { auth, provider } from '../utils/firebase'
-import api from '../utils/axios';
-
+import { useDispatch, useSelector } from 'react-redux'
+import toast from 'react-hot-toast'
+import { loginUser } from '../redux/userSlice'
 
 
 const container = {
@@ -17,18 +18,17 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } },
 }
 
-function LoginModel({onClose,setUser}) {
+function LoginModel({onClose}) {
+    const dispatch = useDispatch()
+    const loginLoading = useSelector((state) => state.user.loginLoading)
     const handleGoogleAuth = async()=>{
     try {
         const result = await signInWithPopup(auth,provider);
       const token = await result.user?.getIdToken()
-      const response = await  api.post("/api/auth/login",{token})
-      setUser(response?.data?.user)
+      await dispatch(loginUser(token)).unwrap()
       onClose()
-      console.log(result)
-
     } catch (error) {
-        console.log(error);
+        toast.error(typeof error === 'string' ? error : error?.message || 'Unable to log in. Please try again.')
     }
 }
   return (
@@ -76,13 +76,14 @@ function LoginModel({onClose,setUser}) {
           {/* Google auth button */}
           <motion.button
           onClick={handleGoogleAuth}
+            disabled={loginLoading}
             variants={item}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className='mt-8 w-full flex items-center justify-center gap-3 px-5 py-3 rounded-xl bg-white text-black font-medium shadow-lg shadow-black/40 hover:bg-gray-100 hover:shadow-xl transition-colors'
+            className='mt-8 w-full flex items-center justify-center gap-3 px-5 py-3 rounded-xl bg-white text-black font-medium shadow-lg shadow-black/40 hover:bg-gray-100 hover:shadow-xl transition-colors disabled:cursor-not-allowed disabled:opacity-60'
           >
             <FaGoogle className='text-lg' />
-            Login with Google
+            {loginLoading ? 'Signing in...' : 'Login with Google'}
           </motion.button>
         </motion.div>
       </motion.div>

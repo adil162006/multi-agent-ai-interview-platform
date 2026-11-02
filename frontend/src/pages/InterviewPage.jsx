@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { getInterview } from '../apis/interview.api'
 import Step2interview from '../components/interterview/Step2interview'
 
-function InterviewPage({user,setUser}) {
+function InterviewPage() {
     const {id} = useParams()
     const navigate=useNavigate()
     const [loading,setLoading]= useState(true)
@@ -62,7 +62,6 @@ if(!interview)return null
             question:interview.questions[interview.currentQuestion],
         }
       }
-        user={user}
         onInterviewUpdate={(updatedInterview) => {
           if (updatedInterview) setInterview((current) => ({ ...current, ...updatedInterview }))
         }}

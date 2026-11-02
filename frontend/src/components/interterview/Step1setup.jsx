@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import { ArrowLeft, ArrowRight, Check, CheckCircle2, CloudUpload, FileText } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
+import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { useCoins } from '../../apis/user.api'
 import { useDispatch, useSelector } from 'react-redux'
-import { setResume } from '../../redux/resumeSlice'
-import api from '../../utils/axios'
+import { updateUser } from '../../redux/userSlice'
 import { startInterview } from '../../apis/interview.api'
 import toast from 'react-hot-toast'
 
@@ -18,54 +17,31 @@ const benefits = [
 
 const INTERVIEW_COIN_COST = 50
 
-function Step1setup({ user, setUser }) {
+function Step1setup() {
   const navigate = useNavigate()
   const dispatch =  useDispatch()
   const {resume}  = useSelector((state)=> state.resume)
+  const user = useSelector((state) => state.user.user)
   const [targetRole, setTargetRole] = useState('')
   const [interviewType, setInterviewType] = useState('Technical')
   const [useResume, setUseResume] = useState(false)
-  const [selectedResume, setSelectedResume] = useState(null)
-  const [resumeUploaded, setResumeUploaded] = useState(false)
-  const [uploading, setUploading] = useState(false)
   const [starting,setStarting] = useState(false)
 
-  const canStart = !useResume || resumeUploaded
-
-
-
- const uploadResume = async () => {
-        if(!selectedResume){
-            alert("please select a pdf ")
-            return
-        }
-        try {
-            setUploading(true);
-
-            const coinResponse = await useCoins({coins:10,action:"resume-scorer"})
-            setUser((prev)=>({
-                ...prev,
-                interviewCoin:coinResponse?.interviewCoin
-            }))
-
-            const formData = new FormData();
-            formData.append("resume",selectedResume)
-            const response = await api.post("/api/resume/",formData)
-
-            dispatch(setResume(response?.data?.data))
-            setResumeUploaded(true)
-            console.log(response.data)
-        } catch (error) {
-            console.log(error);
-            alert(error.response?.status === 403
-                ? "Low interview coins. Please purchase more."
-                : error.response?.data?.message ?? "upload failed")
-        } finally {
-            setUploading(false)
-        }
+  const toggleResume = () => {
+    if (!resume) {
+      toast.error('Upload and score your resume in Resume Scorer before using it for an interview.')
+      return
     }
+    setUseResume((enabled) => !enabled)
+  }
+
     const start = async()=>{
         if (starting) return
+        if (useResume && !resume) {
+            toast.error('Upload and score your resume in Resume Scorer before using it for an interview.')
+            return
+        }
+
         const availableCoins = Number(user?.interviewCoin ?? 0)
         if (!Number.isFinite(availableCoins) || availableCoins < INTERVIEW_COIN_COST) {
             toast.error(`You need ${INTERVIEW_COIN_COST} interview coins to start an interview.`)
@@ -94,10 +70,7 @@ function Step1setup({ user, setUser }) {
                 return
             }
 
-            setUser((prev)=>({
-                ...prev,
-                interviewCoin:coinResponse?.interviewCoin
-            }))
+            dispatch(updateUser({ interviewCoin: coinResponse.interviewCoin }))
             navigate(`/interview/${response.interviewId}`)
         } catch (error) {
             console.log(error)
@@ -230,7 +203,7 @@ function Step1setup({ user, setUser }) {
                 role="switch"
                 aria-checked={useResume}
                 aria-label="Use Resume"
-                onClick={() => setUseResume((enabled) => !enabled)}
+                onClick={toggleResume}
                 whileTap={{ scale: 0.92 }}
                 className={`relative h-7 w-12 shrink-0 rounded-full transition ${
                   useResume ? 'bg-emerald-500' : 'bg-gray-600'
@@ -244,84 +217,12 @@ function Step1setup({ user, setUser }) {
               </motion.button>
             </div>
 
-            <AnimatePresence initial={false}>
-              {useResume && (
-                <motion.div
-                  key="resume-upload"
-                  initial={{ opacity: 0, height: 0, y: -8 }}
-                  animate={{ opacity: 1, height: 'auto', y: 0 }}
-                  exit={{ opacity: 0, height: 0, y: -8 }}
-                  transition={{ duration: 0.25, ease: 'easeInOut' }}
-                  className="space-y-5 overflow-hidden"
-                >
-                  {selectedResume && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.97 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.07] px-4 py-3.5"
-                    >
-                      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500 text-white">
-                        <FileText size={18} />
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-gray-100">Resume Ready</p>
-                        <p className="truncate text-xs text-gray-400">{selectedResume.name}</p>
-                      </div>
-                      <CheckCircle2 className="shrink-0 text-emerald-400" size={19} />
-                    </motion.div>
-                  )}
-
-                  <motion.label
-                    whileHover={{ scale: 1.01, borderColor: 'rgba(255,255,255,0.3)' }}
-                    whileTap={{ scale: 0.99 }}
-                    className="flex min-h-32 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-white/15 bg-[#17181e] px-5 py-5 text-center transition hover:border-white/30 hover:bg-white/[0.03]"
-                  >
-                    <input
-                      type="file"
-                      accept=".pdf,.doc,.docx"
-                      onChange={(event) => {
-                        setSelectedResume(event.target.files?.[0] || null)
-                        setResumeUploaded(false)
-                      }}
-                      className="sr-only"
-                      aria-label="Upload resume"
-                    />
-                    <span className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#101116]">
-                      <CloudUpload size={20} />
-                    </span>
-                    <span className="text-sm font-semibold">
-                      {selectedResume ? 'Upload a different resume' : 'Upload Resume'}
-                    </span>
-                    <span className="mt-1.5 text-xs leading-5 text-gray-500">
-                      {selectedResume
-                        ? 'Choose a new file to replace your current resume.'
-                        : 'PDF or Word document'}
-                    </span>
-                  </motion.label>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {useResume && selectedResume && (
-              <motion.button
-                type="button"
-                onClick={uploadResume}
-                disabled={uploading}
-                whileHover={!uploading ? { scale: 1.015 } : undefined}
-                whileTap={!uploading ? { scale: 0.985 } : undefined}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/15 bg-[#191a20] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-white/[0.08] disabled:cursor-wait disabled:opacity-60"
-              >
-                <CloudUpload size={17} />
-                {uploading ? 'Uploading Resume...' : 'Upload Resume'}
-              </motion.button>
-            )}
-
             <motion.button
             onClick={start}
               type="button"
-              disabled={!canStart || starting}
-              whileHover={canStart && !starting ? { scale: 1.015 } : undefined}
-              whileTap={canStart && !starting ? { scale: 0.985 } : undefined}
+              disabled={starting}
+              whileHover={!starting ? { scale: 1.015 } : undefined}
+              whileTap={!starting ? { scale: 0.985 } : undefined}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-white px-5 py-3.5 text-sm font-semibold text-[#101116] transition hover:bg-gray-200 disabled:cursor-not-allowed disabled:bg-gray-500 disabled:text-gray-900"
             >
               {starting ? 'Starting Interview...' : 'Start Interview'}

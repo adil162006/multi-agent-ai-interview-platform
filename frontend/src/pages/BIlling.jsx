@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
 import toast from 'react-hot-toast'
-import { FileText, Map, Menu, MessageSquareText, ScanSearch } from 'lucide-react'
+import { FileText, Map, MessageSquareText, ScanSearch } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import PlanCard from '../components/billing/PlanCard'
 import api from '../utils/axios'
+import { updateUser } from '../redux/userSlice'
 const plans = [
   {
     name: 'Free',
@@ -31,8 +33,9 @@ const services = [
   { name: 'Roadmap Generator', description: 'Generate a personalized learning roadmap for your goal.', cost: 20, icon: Map },
 ]
 
-function Billing({ setUser }) {
+function Billing() {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const [paymentPending, setPaymentPending] = useState(false)
 
   const handlePayment = async (plan) => {
@@ -64,7 +67,7 @@ function Billing({ setUser }) {
             const { data: credit } = await api.post('/api/auth/add-coins', {
               coins: verification.interviewCoins,
             })
-            setUser((current) => ({ ...current, interviewCoin: credit.interviewCoin }))
+            dispatch(updateUser({ interviewCoin: credit.interviewCoin }))
             toast.success('Payment successful. Coins added to your account.')
             navigate('/dashboard')
           } catch (error) {
@@ -89,18 +92,7 @@ function Billing({ setUser }) {
   }
   return (
     <div className="min-h-screen bg-white text-[#111113]">
-      <Navbar
-        label="Interview Coins"
-        action={
-          <button
-            type="button"
-            aria-label="Open menu"
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-black/10 text-black/60 transition hover:bg-black/5"
-          >
-            <Menu size={18} />
-          </button>
-        }
-      />
+      <Navbar label="Interview Coins" />
       <main className="mx-auto flex w-full max-w-5xl flex-col items-center px-5 pb-16 pt-24 sm:px-8 sm:pt-28">
         <header className="mb-8 text-center sm:mb-9">
           <h1 className="text-3xl font-bold tracking-tight text-[#111113] sm:text-[36px]">Interview Coins</h1>

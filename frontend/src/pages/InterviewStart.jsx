@@ -1,9 +1,9 @@
 import Step1setup from '../components/interterview/Step1setup'
 
-function InterviewStart({ user, setUser }) {
+function InterviewStart() {
   return (
     <div>
-      <Step1setup user={user} setUser={setUser} />
+      <Step1setup />
     </div>
   )
 }

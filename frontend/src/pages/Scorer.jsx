@@ -4,6 +4,7 @@ import { FiAlertCircle, FiTrendingUp, FiUploadCloud, FiUser } from 'react-icons/
 import api from '../utils/axios'
 import { useDispatch, useSelector } from 'react-redux'
 import { setResume } from '../redux/resumeSlice'
+import { updateUser } from '../redux/userSlice'
 import { PolarAngleAxis, RadialBar, RadialBarChart } from 'recharts'
 import Navbar from '../components/Navbar'
 import { useCoins } from '../apis/user.api'
@@ -53,9 +54,8 @@ const ScoreRing = ({score})=>{
 }
 
 
-function Scorer({user,setUser}) {
-    
-    
+function Scorer() {
+    const user = useSelector((state) => state.user.user)
     const[file,setFile]=useState(null)
     const [loading,setLoading]=useState(false)
 
@@ -83,10 +83,7 @@ function Scorer({user,setUser}) {
                 return
             }
 
-            setUser((prev)=>({
-                ...prev,
-                interviewCoin:coinResponse.interviewCoin
-            }))
+            dispatch(updateUser({ interviewCoin: coinResponse.interviewCoin }))
 
             const formData = new FormData();
             formData.append("resume",file)

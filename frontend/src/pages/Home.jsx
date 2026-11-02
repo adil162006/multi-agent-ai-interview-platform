@@ -31,7 +31,7 @@ const agents = [
   },
 ];
 
-function Home({setUser}) {
+function Home() {
   const [showLogin, setShowLogin] = useState(false);
 
   return (
@@ -215,7 +215,7 @@ function Home({setUser}) {
         </div>
       </footer>
 
-      {showLogin && <LoginModel onClose={()=>setShowLogin(false)} setUser={setUser}/>}
+      {showLogin && <LoginModel onClose={()=>setShowLogin(false)} />}
     </div>
   )
 }
