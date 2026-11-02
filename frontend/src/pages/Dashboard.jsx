@@ -12,7 +12,7 @@ import { getAllInterviews } from '../apis/interview.api'
 
 /* ---------- PAGE ---------- */
 function Dashboard({ user, setUser }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [dashboardError, setDashboardError] = useState('')

@@ -1,11 +1,12 @@
 import express from "express";
 import { connectDb } from "./config/db.js";
 import { ENV } from "./config/env.js";
-
+import billingRouter from "./routes/billing.route.js";
 
 const app = express()
 
 app.use(express.json())
+app.use("/", billingRouter)
 
 
 

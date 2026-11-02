@@ -24,10 +24,13 @@ const userSchema = new mongoose.Schema(
             lowercase: true,
         },
         interviewCoin:{
-            type:String,
+            type:Number,
             default:150,
-            
-        }
+        },
+        creditedPaymentIds: {
+            type: [String],
+            default: [],
+        },
 
     },
     {

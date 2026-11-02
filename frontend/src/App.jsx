@@ -14,6 +14,7 @@ import InterviewReport from "./pages/InterviewReport";
 import { Toaster } from "react-hot-toast";
 import Roadmap from "./pages/Roadmap";
 import ShowRoadmap from "./pages/ShowRoadmap";
+import Billing from "./pages/BIlling";
 
 function App() {
   const dispatch = useDispatch()
@@ -141,6 +142,16 @@ function App() {
         element={
           user ? (
             <ShowRoadmap />
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
+      />
+      <Route
+        path="/billing"
+        element={
+          user ? (
+            <Billing user={user} setUser={setUser} />
           ) : (
             <Navigate to="/" replace />
           )

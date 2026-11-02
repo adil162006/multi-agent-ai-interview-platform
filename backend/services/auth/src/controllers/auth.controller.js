@@ -1,7 +1,7 @@
 import { getAuth } from "firebase-admin/auth";
 import { app } from "../configs/firebase.js";
 import { User } from "../models/user.model.js";
-import redis from "../../../../shared/redis/redis.js"
+import redisClient from "../../../../shared/redis/redis.js";
 
 
 export const login = async(req,res)=>{
@@ -17,7 +17,7 @@ export const login = async(req,res)=>{
             })
         }
         const sessionId = crypto.randomUUID();
-        await redis.set(`session:${sessionId}`,JSON.stringify({
+        await redisClient.set(`session:${sessionId}`,JSON.stringify({
             userId:user._id,
             name:user.name,
             email:user.email,
@@ -43,7 +43,7 @@ export const logout = async(req,res)=>{
         const sessionId = req.cookies?.session
 
         if(sessionId){
-            await redis.del(`session:${sessionId}`)
+            await redisClient.del(`session:${sessionId}`)
         }
         res.clearCookie("session",{
             httpOnly:true,
@@ -61,7 +61,13 @@ export const logout = async(req,res)=>{
 export const useCoins = async(req,res)=>{
     try {
         const sessionId = req.cookies?.session
-        const session =  await redis.get(`session:${sessionId}`);
+        if (!sessionId) {
+            return res.status(401).json({
+                success: false,
+                message: "Session Expired"
+            });
+        }
+        const session = await redisClient.get(`session:${sessionId}`);
         if (!session) {
             return res.status(401).json({
                 success: false,
@@ -89,7 +95,7 @@ export const useCoins = async(req,res)=>{
         }
         user.interviewCoin -=coins
         await user.save()
-        await redis.set(`session:${sessionId}`,JSON.stringify({
+        await redisClient.set(`session:${sessionId}`,JSON.stringify({
             userId:user._id,
             name:user.name,
             email:user.email,
@@ -106,6 +112,53 @@ export const useCoins = async(req,res)=>{
 
     } catch (error) {
          return res.status(500).json({success:false,message:error.message})
+        
+    }
+}
+
+export const addCoins = async (req,res) => {
+    try {
+        const sessionId = req.cookies?.session
+        if (!sessionId) {
+            return res.status(401).json({
+                success: false,
+                message: "Session Expired"
+            });
+        }
+        const session = await redisClient.get(`session:${sessionId}`);
+        if (!session) {
+            return res.status(401).json({
+                success: false,
+                message: "Session Expired"
+            });
+        }
+        const sessionData = JSON.parse(session)
+
+        const {coins} = req.body;
+        if(!coins || coins<=0)return res.status(400).json({success:false,message:"Valid Coins are required"})
+        
+        const user = await User.findById(sessionData.userId)
+
+        if(!user){
+            return res.status(404).json({success:false,message:"User not found"})
+        }
+        user.interviewCoin +=Number(coins)
+        await user.save()
+         await redisClient.set(`session:${sessionId}`,JSON.stringify({
+            userId:user._id,
+            name:user.name,
+            email:user.email,
+            interviewCoin:user.interviewCoin
+        }),"EX",7*24*60*60);
+
+
+        return res.status(200).json({
+            success:true,
+            message:"Interview coins added successfully",
+            interviewCoin:user.interviewCoin
+        })
+
+    } catch (error) {
         
     }
 }
