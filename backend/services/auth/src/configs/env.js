@@ -12,4 +12,5 @@ export const ENV = {
   FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY,
 
   REDIS_URL: process.env.REDIS_URL,
+  CREDIT_TOKEN_SECRET: process.env.CREDIT_TOKEN_SECRET,
 };

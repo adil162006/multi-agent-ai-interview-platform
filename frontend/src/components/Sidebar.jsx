@@ -189,7 +189,7 @@ function SidebarContent({
               </div>
             </div>
             <button
-              onClick={() => navigate('/pricing')}
+              onClick={() => navigate('/billing')}
               aria-label='Add coins'
               className='w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors cursor-pointer shrink-0'
             >
