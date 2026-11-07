@@ -25,8 +25,8 @@ export const login = async(req,res)=>{
         }),"EX",7*24*60*60);
         res.cookie("session",sessionId,{
             httpOnly:true,
-            secure:false,
-            sameSite:"strict",
+            secure:true,
+            sameSite:"none",
             maxAge: 1000*60*60*24*7,
         })
         return res.status(201).json({success:true,user})
@@ -47,8 +47,8 @@ export const logout = async(req,res)=>{
         }
         res.clearCookie("session",{
             httpOnly:true,
-            secure:false,
-            sameSite:"strict"
+            secure:true,
+            sameSite:"none"
         })
 
         return res.status(200).json({success:true,message:"logout successfully"})
