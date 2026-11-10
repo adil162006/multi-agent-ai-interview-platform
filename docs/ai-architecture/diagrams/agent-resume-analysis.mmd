@@ -1,0 +1,11 @@
+flowchart TD
+    Input[Extracted PDF text] --> Messages[System instructions + HumanMessage]
+    Messages --> LLM[ChatGroq JSON response mode]
+    LLM --> Content[response.content]
+    Content --> Parse[JSON.parse]
+    Parse --> Normalize[Map strength/strengths and weakness/weaknesses aliases]
+    Normalize --> Output[Return analysis object]
+    Parse -->|Error| ControllerCatch[Resume controller handles failure]
+    LLM -->|Error| ControllerCatch
+    Output --> Mongo[Controller persists MongoDB]
+    Mongo --> Redis[Controller caches Redis]

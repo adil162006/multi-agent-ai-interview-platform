@@ -16,6 +16,7 @@ InterviewAI is a web application for AI-assisted interview practice, resume anal
 - [Configuration](#configuration)
 - [Security, reliability, and operations](#security-reliability-and-operations)
 - [Detailed technical documentation](docs/README.md)
+- [Detailed AI agent architecture and diagrams](docs/ai-architecture/README.md)
 
 ## Capabilities
 

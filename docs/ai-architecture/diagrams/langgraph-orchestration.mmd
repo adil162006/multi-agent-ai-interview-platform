@@ -1,0 +1,17 @@
+flowchart TD
+    subgraph Interview[Interview StateGraph]
+        IS([START]) --> IR{router: state.action}
+        IR -->|start| IN[interviewAgent node / interviewNode]
+        IR -->|feedback| FN[feedbackAgent node / feedbackNode]
+        IR -->|other returns END| IE([END])
+        IN --> IE
+        FN --> FR{feedbackRouter: completed?}
+        FR -->|false| IE
+        FR -->|true| SN[summaryAgent node / summaryNode]
+        SN --> IE
+    end
+    subgraph Roadmap[Roadmap StateGraph]
+        RS([START]) --> RN[roadmapAgent node]
+        RN --> Resource[resourceAgent node]
+        Resource --> RE([END])
+    end

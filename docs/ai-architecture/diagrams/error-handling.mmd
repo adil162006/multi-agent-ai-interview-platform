@@ -1,0 +1,16 @@
+flowchart TD
+    Start[AI API request] --> Work[Controller invokes graph or agent]
+    Work --> Model[ChatGroq invocation]
+    Model --> Parse[Parse structured response]
+    Parse -->|success| Persist[Persist result and respond]
+    Model -->|provider failure| Catch{Workflow catch behavior}
+    Parse -->|invalid JSON| Catch
+    Catch -->|Resume controller| Resume500[Cleanup upload if possible; HTTP 500]
+    Catch -->|Interview controller| Interview500[Log; HTTP 500]
+    Catch -->|Roadmap controller| Roadmap500[Log; HTTP 500]
+    Resource[Resource agent] -->|Malformed docs JSON| EmptyDocs[Log; continue with empty docs]
+    Resource -->|YouTube error/no result| EmptyVideo[Log/return null; attach empty URL]
+    Resource -->|Outer error| StateError[Return state plus error field]
+    Feedback[Feedback agent catch references out-of-scope response] --> Masked[Possible ReferenceError masks original]
+    Summary[Summary agent catch references out-of-scope response] --> Masked
+    Retry[ChatGroq maxRetries: 2] -. client config .-> Model

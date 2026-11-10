@@ -1,0 +1,27 @@
+flowchart LR
+    UI[React frontend] --> Gateway[Express gateway]
+    Gateway --> ResumeAPI[Resume API]
+    Gateway --> InterviewAPI[Interview API]
+    Gateway --> RoadmapAPI[Roadmap API]
+    ResumeAPI --> ResumeAgent[Resume analysis agent]
+    InterviewAPI --> InterviewGraph[Interview LangGraph]
+    InterviewGraph --> QAgent[Question agent]
+    InterviewGraph --> FAgent[Feedback agent]
+    InterviewGraph --> SAgent[Summary agent]
+    RoadmapAPI --> RoadmapGraph[Roadmap LangGraph]
+    RoadmapGraph --> RAgent[Roadmap generation agent]
+    RoadmapGraph --> ResourceAgent[Learning resource agent]
+    ResumeAgent --> LLM[ChatGroq model]
+    QAgent --> LLM
+    FAgent --> LLM
+    SAgent --> LLM
+    RAgent --> LLM
+    ResourceAgent --> LLM
+    ResourceAgent --> YouTube[YouTube API helper]
+    ResumeAPI --> Mongo[(MongoDB)]
+    InterviewAPI --> Mongo
+    RoadmapAPI --> Mongo
+    Gateway --> Redis[(Redis sessions)]
+    ResumeAPI --> Redis
+    InterviewAPI --> Redis
+    RoadmapAPI --> Redis

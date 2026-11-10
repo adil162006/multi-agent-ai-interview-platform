@@ -1,0 +1,24 @@
+sequenceDiagram
+    participant UI as React client
+    participant GW as Gateway
+    participant Redis as Redis session
+    participant API as Resume service
+    participant PDF as PDF parser
+    participant Agent as resumeAgent
+    participant LLM as ChatGroq
+    participant DB as MongoDB
+    UI->>GW: POST /api/resume (multipart resume)
+    GW->>Redis: GET session:<id>
+    Redis-->>GW: Session/user identity
+    GW->>API: Proxy request + x-user-id
+    API->>PDF: Extract text from uploaded PDF
+    PDF-->>API: Resume text
+    API->>Agent: resumeAgent(resumeText)
+    Agent->>LLM: Invoke JSON-mode prompt
+    LLM-->>Agent: Analysis content
+    Agent-->>API: Parsed and normalized fields
+    API->>DB: Create/update resume record
+    DB-->>API: Saved resume
+    API->>Redis: SET resume:<userId>
+    API-->>GW: 200 analysis response
+    GW-->>UI: Resume analysis JSON

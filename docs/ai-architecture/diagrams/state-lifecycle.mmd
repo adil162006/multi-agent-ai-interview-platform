@@ -1,0 +1,20 @@
+flowchart TD
+    subgraph Interview[Interview: state lives for one invoke]
+        Input[Controller constructs input] --> State[InterviewState Annotation]
+        State --> Node1[Node reads selected fields]
+        Node1 --> Update[Node returns partial state update]
+        Update --> Route{Conditional router}
+        Route --> Node2[Next node reads shared invocation state]
+        Node2 --> Output[Graph returns result]
+        Output --> Persist[Controller writes interview MongoDB document]
+        Persist -. new HTTP request reloads document .-> Input
+    end
+    subgraph Roadmap[Roadmap: one graph invocation]
+        RInput[Controller request fields] --> RState[roadmapState Annotation]
+        RState --> RNode[Roadmap agent updates roadmap]
+        RNode --> Resource[Resource agent enriches modules]
+        Resource --> ROutput[Graph result]
+        ROutput --> RDB[Controller persists MongoDB]
+        RDB --> Cache[Redis retrieval cache]
+    end
+    NoCheckpoint[No checkpointer or thread persistence configured]

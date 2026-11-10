@@ -1,0 +1,10 @@
+flowchart TD
+    Input[question, answer, difficulty] --> Prompt[feedbackPrompt]
+    Prompt --> LLM[ChatGroq llm.invoke]
+    LLM --> Clean[Strip JSON fences]
+    Clean --> Parse{JSON.parse}
+    Parse -->|Success| Output[Feedback scores, text, improvements]
+    Parse -->|Failure| Catch[Catch block]
+    LLM -->|Invocation error| Catch
+    Catch --> Scope[References response outside try scope]
+    Scope --> Mask[Possible ReferenceError]

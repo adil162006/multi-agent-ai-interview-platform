@@ -1,0 +1,25 @@
+flowchart LR
+    subgraph InterviewGraph[Interview graph schedules nodes; agents do not message directly]
+        IState[(Interview graph state)]
+        Q[Question agent] -->|questions output| IState
+        IState -->|question, answer, difficulty| F[Feedback agent]
+        F -->|feedback output| IState
+        IState -->|role, type, questions when completed| S[Summary agent]
+        S -->|report output| IState
+    end
+    subgraph RoadmapGraph[Roadmap graph passes state sequentially]
+        RState[(Roadmap graph state)]
+        R[Roadmap agent] -->|roadmap| RState
+        RState -->|roadmap modules| Resource[Resource agent]
+        Resource -->|enriched modules| RState
+    end
+    ResumeController[Resume controller] -->|extracted PDF text| ResumeAgent[Resume analysis agent]
+    ResumeAgent -->|analysis object| ResumeController
+    Model[ChatGroq]
+    Q --> Model
+    F --> Model
+    S --> Model
+    R --> Model
+    Resource --> Model
+    ResumeAgent --> Model
+    Resource --> YouTube[YouTube API helper]

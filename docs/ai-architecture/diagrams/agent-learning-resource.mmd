@@ -1,0 +1,23 @@
+flowchart TD
+    Input[Roadmap state with modules] --> Titles[Collect module titles]
+    Titles --> DocsPrompt[LLM prompt for title/article JSON]
+    DocsPrompt --> LLM[ChatGroq llm.invoke]
+    LLM --> Parse{Parse JSON}
+    Parse -->|Success| Map[Map articles by lowercase title]
+    Parse -->|Malformed JSON| Empty[Log; empty docs map]
+    Map --> ForEach[Process modules with Promise.all]
+    Empty --> ForEach
+    ForEach --> Search[searchVideo(module title)]
+    Search --> Primary[YouTube query: free code camp topic]
+    Primary --> Channel{Channel includes freecodecamp.org?}
+    Channel -->|Yes| Found[Use video result]
+    Channel -->|No| Fallback[YouTube query: topic tutorial]
+    Fallback --> Result{Result available?}
+    Result -->|Yes| Found
+    Result -->|No| NoVideo[Empty video URL]
+    Search -->|Caught API error| NoVideo
+    Found --> Attach[Attach youtube and article fields]
+    NoVideo --> Attach
+    Attach --> Output[Return enriched modules]
+    DocsPrompt -->|Outer failure| Error[Catch; return state with error]
+    ForEach -->|Unexpected failure| Error

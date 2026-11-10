@@ -28,10 +28,11 @@ This documentation records application behavior found in the repository and the 
 | [20-scalability-and-high-availability.md](20-scalability-and-high-availability.md) | Scaling and availability assessment |
 | [21-cost-analysis.md](21-cost-analysis.md) | Cost drivers and practical controls |
 | [22-aws-well-architected-review.md](22-aws-well-architected-review.md) | Six-pillar assessment |
+| [ai-architecture/](ai-architecture/README.md) | Detailed agent, LangGraph, workflow, and interview-preparation documentation |
 
 ## Diagrams
 
-The Mermaid source diagrams are in [diagrams/](diagrams/): [complete-system-architecture.mmd](diagrams/complete-system-architecture.mmd), [aws-infrastructure.mmd](diagrams/aws-infrastructure.mmd), [vpc-networking.mmd](diagrams/vpc-networking.mmd), [cloudfront-alb-flow.mmd](diagrams/cloudfront-alb-flow.mmd), [alb-gateway-flow.mmd](diagrams/alb-gateway-flow.mmd), [security-groups.mmd](diagrams/security-groups.mmd), [ecs-microservices.mmd](diagrams/ecs-microservices.mmd), [ecr-ecs-deployment.mmd](diagrams/ecr-ecs-deployment.mmd), [redis-integration.mmd](diagrams/redis-integration.mmd), [agentic-workflow.mmd](diagrams/agentic-workflow.mmd), and [request-lifecycle.mmd](diagrams/request-lifecycle.mmd).
+The Mermaid source diagrams are in [diagrams/](diagrams/): [complete-system-architecture.mmd](diagrams/complete-system-architecture.mmd), [aws-infrastructure.mmd](diagrams/aws-infrastructure.mmd), [vpc-networking.mmd](diagrams/vpc-networking.mmd), [cloudfront-alb-flow.mmd](diagrams/cloudfront-alb-flow.mmd), [alb-gateway-flow.mmd](diagrams/alb-gateway-flow.mmd), [security-groups.mmd](diagrams/security-groups.mmd), [ecs-microservices.mmd](diagrams/ecs-microservices.mmd), [ecr-ecs-deployment.mmd](diagrams/ecr-ecs-deployment.mmd), [redis-integration.mmd](diagrams/redis-integration.mmd), [agentic-workflow.mmd](diagrams/agentic-workflow.mmd), and [request-lifecycle.mmd](diagrams/request-lifecycle.mmd). Detailed per-agent and LangGraph diagrams are in [ai-architecture/diagrams/](ai-architecture/diagrams/).
 
 ## Evidence conventions
 

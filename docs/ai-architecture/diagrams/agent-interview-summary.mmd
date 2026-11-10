@@ -1,0 +1,11 @@
+flowchart TD
+    Input[role, type, prior questions/feedback plus final answer] --> Prompt[summaryPrompt]
+    Input -. current feedback not attached yet .-> Caveat[Controller attaches final feedback after graph returns]
+    Prompt --> LLM[ChatGroq llm.invoke]
+    LLM --> Clean[Strip JSON fences]
+    Clean --> Parse{JSON.parse}
+    Parse -->|Success| Output[overallScore, summary, strengths, weaknesses, recommendations]
+    Parse -->|Failure| Catch[Catch block]
+    LLM -->|Invocation error| Catch
+    Catch --> Scope[References response outside try scope]
+    Scope --> Mask[Possible ReferenceError]

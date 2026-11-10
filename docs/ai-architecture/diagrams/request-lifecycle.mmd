@@ -1,0 +1,28 @@
+sequenceDiagram
+    participant UI as Frontend
+    participant GW as Gateway
+    participant Redis as Redis session
+    participant API as AI service
+    participant Graph as LangGraph or agent call
+    participant Agent as Agent function
+    participant LLM as ChatGroq
+    participant Tool as YouTube API helper
+    participant DB as MongoDB
+    UI->>GW: Credentialed AI API request
+    GW->>Redis: Validate session (protected routes)
+    Redis-->>GW: Session/user
+    GW->>API: Proxy + x-user-id
+    API->>Graph: Invoke graph / direct agent
+    Graph->>Agent: Run node agent
+    Agent->>LLM: Prompt invocation
+    LLM-->>Agent: Model response
+    opt Roadmap resource enrichment
+        Agent->>Tool: Search video by module
+        Tool-->>Agent: Video URL or null
+    end
+    Agent-->>Graph: Parsed/processed result
+    Graph-->>API: Final graph state
+    API->>DB: Persist user result
+    DB-->>API: Saved document
+    API-->>GW: HTTP response
+    GW-->>UI: JSON response

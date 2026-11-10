@@ -1,0 +1,14 @@
+flowchart TD
+    Input[Input role, type, useResume, resume] --> Normalize[Trim and lowercase type]
+    Normalize --> NonEmpty{Nonempty string?}
+    NonEmpty -->|No| Throw[Throw validation error]
+    NonEmpty -->|Yes| Choose{type is hr?}
+    Choose -->|Yes| HRPrompt[Build HR prompt]
+    Choose -->|No| TechPrompt[Build technical prompt]
+    HRPrompt --> LLM[ChatGroq llm.invoke]
+    TechPrompt --> LLM
+    LLM --> Content[response.content]
+    Content --> Clean[Remove fenced JSON markers]
+    Clean --> Parse{JSON.parse}
+    Parse -->|OK| Questions[Return question JSON]
+    Parse -->|Error| Catch[Log and rethrow]

@@ -1,0 +1,13 @@
+flowchart TD
+    Input[role, targetPackage, useResume, resume] --> HasResume{useResume?}
+    HasResume -->|Yes| Select[Select candidate context fields]
+    HasResume -->|No| Empty[Set resume context to null]
+    Select --> Messages[Build system and human messages]
+    Empty --> Messages
+    Messages --> LLM[ChatGroq llm.invoke]
+    LLM --> Clean[Strip JSON fences]
+    Clean --> Parse{JSON.parse}
+    Parse -->|Success| Normalize[Normalize level and difficulty capitalization]
+    Normalize --> Output[Merge roadmap into state]
+    Parse -->|Error| Catch[Log and rethrow]
+    LLM -->|Provider error| Catch

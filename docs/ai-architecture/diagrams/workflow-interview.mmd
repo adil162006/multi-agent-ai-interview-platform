@@ -1,0 +1,48 @@
+sequenceDiagram
+    participant UI as React client
+    participant GW as Gateway
+    participant Redis as Redis session
+    participant API as Interview service
+    participant Graph as Interview StateGraph
+    participant Q as Question agent
+    participant F as Feedback agent
+    participant S as Summary agent
+    participant LLM as ChatGroq
+    participant DB as MongoDB
+    UI->>GW: POST /api/interview/start
+    GW->>Redis: Validate session
+    Redis-->>GW: Session identity
+    GW->>API: Proxy + x-user-id
+    API->>Graph: invoke(action=start, role, type, resume)
+    Graph->>Q: Route START to interviewAgent node
+    Q->>LLM: Prompt for HR/technical questions
+    LLM-->>Q: Question JSON text
+    Q-->>Graph: Parsed question list
+    Graph-->>API: Questions
+    API->>DB: Create interview record
+    DB-->>API: Interview ID and saved questions
+    API-->>UI: First question and interview ID
+    loop Each submitted answer is a separate HTTP request
+        UI->>GW: POST /api/interview/answer
+        GW->>Redis: Validate session
+        Redis-->>GW: Session identity
+        GW->>API: Proxy + x-user-id
+        API->>DB: Load interview and current question
+        DB-->>API: Interview state
+        API->>Graph: invoke(action=feedback, answer, completed, questions)
+        Graph->>F: Run feedbackAgent node
+        F->>LLM: Evaluate question and answer
+        LLM-->>F: Feedback JSON text
+        F-->>Graph: Parsed feedback
+        alt Last question completed
+            Graph->>S: Conditional edge to summaryAgent
+            S->>LLM: Summarize questions, answers and previously attached feedback
+            LLM-->>S: Final report JSON text
+            S-->>Graph: Parsed report
+        else More questions remain
+            Graph-->>API: Feedback only
+        end
+        Graph-->>API: Feedback and optional report
+        API->>DB: Save answer, feedback, progress and optional report
+        API-->>UI: Feedback and next question or completed report
+    end

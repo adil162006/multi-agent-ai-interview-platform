@@ -1,0 +1,23 @@
+flowchart LR
+    Client[Browser] --> Edge[CloudFront - stated deployment]
+    Edge --> ALB[ALB - stated deployment]
+    ALB --> Gateway[ECS Gateway container]
+    subgraph ECS[ECS services - intended deployment]
+        Gateway --> Auth[Auth container]
+        Gateway --> Resume[Resume container]
+        Gateway --> Interview[Interview container]
+        Gateway --> Roadmap[Roadmap container]
+        Gateway --> Billing[Billing container]
+    end
+    ECR[(ECR images)] --> ECS
+    Gateway --> Redis[(ElastiCache Redis - stated)]
+    Auth --> Redis
+    Resume --> Redis
+    Interview --> Redis
+    Roadmap --> Redis
+    ECS --> Mongo[(MongoDB - host unspecified)]
+    Resume --> LLM[External ChatGroq provider]
+    Interview --> LLM
+    Roadmap --> LLM
+    Roadmap --> YouTube[YouTube API]
+    Note[CloudFront, ALB, ECS, ECR and ElastiCache settings are not in repository]

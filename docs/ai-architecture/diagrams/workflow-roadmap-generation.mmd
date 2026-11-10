@@ -1,0 +1,32 @@
+sequenceDiagram
+    participant UI as React client
+    participant GW as Gateway
+    participant Redis as Redis session/cache
+    participant API as Roadmap service
+    participant Graph as Roadmap StateGraph
+    participant R as Roadmap agent
+    participant Resource as Resource agent
+    participant LLM as ChatGroq
+    participant YT as YouTube Data API
+    participant DB as MongoDB
+    UI->>GW: POST /api/roadmap/generate
+    GW->>Redis: Validate session
+    Redis-->>GW: Session identity
+    GW->>API: Proxy + x-user-id
+    API->>Graph: invoke(role, package, optional resume)
+    Graph->>R: Static edge: roadmapAgent
+    R->>LLM: Generate structured roadmap
+    LLM-->>R: Roadmap JSON text
+    R-->>Graph: Parsed and normalized roadmap state
+    Graph->>Resource: Static edge: resourceAgent
+    Resource->>LLM: Request article recommendations
+    LLM-->>Resource: Article JSON text
+    loop Each roadmap module
+        Resource->>YT: Search FreeCodeCamp, then fallback if needed
+        YT-->>Resource: Video result or no result
+    end
+    Resource-->>Graph: Enriched/mutated roadmap state
+    Graph-->>API: Graph result (output shape caveat documented)
+    API->>DB: Create roadmap record
+    API->>Redis: Invalidate list; cache detail (one hour)
+    API-->>UI: Created roadmap response
