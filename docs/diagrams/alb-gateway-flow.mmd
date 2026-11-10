@@ -1,0 +1,10 @@
+flowchart LR
+    Request[Incoming API request] --> Listener[ALB listener - actual rule unknown]
+    Listener --> Target[Gateway target group - stated architecture]
+    Target --> Gateway[Gateway ECS task]
+    Gateway -->|/api/auth| Auth[Auth service]
+    Gateway -->|/api/resume| Resume[Resume service]
+    Gateway -->|/api/interview| Interview[Interview service]
+    Gateway -->|/api/roadmap| Roadmap[Roadmap service]
+    Gateway -->|/api/billing| Billing[Billing service]
+    Gateway -->|/api/me| Self[Gateway handler]

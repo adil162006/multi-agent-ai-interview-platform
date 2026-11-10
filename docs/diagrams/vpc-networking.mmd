@@ -1,0 +1,24 @@
+flowchart TB
+    Internet((Internet))
+    CF[CloudFront]
+    subgraph VPC[Logical VPC boundary - actual layout unknown]
+        ALB[ALB]
+        subgraph Tasks[ECS task networking - subnet and AZ unknown]
+            Gateway[Gateway task]
+            Services[Backend service tasks]
+        end
+        Redis[(Redis endpoint)]
+    end
+    DB[(MongoDB endpoint)]
+    APIs[External APIs]
+    Internet --> CF --> ALB --> Gateway --> Services
+    Gateway --> Redis
+    Services --> Redis
+    Services --> DB
+    Services --> APIs
+    Routes[Route tables define network paths]
+    SG[Security groups filter resource traffic]
+    Routes -. governs .-> VPC
+    SG -. applies to .-> ALB
+    SG -. applies to .-> Tasks
+    SG -. applies to .-> Redis

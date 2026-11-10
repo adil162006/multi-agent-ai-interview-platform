@@ -20,7 +20,13 @@ app.use(cors({
 
 
 const PORT = process.env.PORT
-
+app.get("/", (req, res) => {
+    res.status(200).json({
+        message: "Hello from Gateway IQ!",
+        service: "gateway",
+        status: "running"
+    });
+});
 
 app.use("/api/auth",proxy((process.env.AUTH_SERVICE_URL)))
 app.use("/api/resume",isAuth,proxyWithHeaders((process.env.RESUME_SERVICE_URL)))

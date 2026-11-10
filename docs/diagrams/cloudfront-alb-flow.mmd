@@ -1,0 +1,11 @@
+sequenceDiagram
+    participant B as Browser
+    participant C as CloudFront (stated)
+    participant A as ALB (stated)
+    participant G as Gateway
+    B->>C: Viewer request (HTTPS setting unverified)
+    C->>A: Origin request (HTTP/HTTPS policy unverified)
+    A->>G: Forward to Gateway target group
+    G-->>A: Application response
+    A-->>C: Origin response
+    C-->>B: Viewer response

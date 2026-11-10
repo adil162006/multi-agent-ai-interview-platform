@@ -1,0 +1,8 @@
+flowchart LR
+    Clients[Approved viewer/origin sources] -->|Listener port; verify protocol| ALBSG[ALB security group]
+    ALBSG -->|Gateway port 8000; recommended source reference| ECSSG[ECS application security group]
+    ECSSG -->|Required internal service ports| Tasks[Gateway and backend tasks]
+    ECSSG -->|Redis port; verify endpoint| RedisSG[Redis security group]
+    RedisSG --> Redis[(ElastiCache Redis)]
+    Tasks -->|Restricted required egress| External[External integrations]
+    Actual[Actual rules are not in repository] -. note .-> ALBSG

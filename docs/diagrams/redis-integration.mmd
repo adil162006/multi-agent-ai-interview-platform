@@ -1,0 +1,10 @@
+flowchart LR
+    Gateway[Gateway auth middleware] -->|GET session:key| Redis[(Redis / ElastiCache)]
+    Auth[Auth service] -->|SET / GET / DEL session:key; 7-day TTL| Redis
+    Resume[Resume service] -->|GET / SET resume:user| Redis
+    Roadmap[Roadmap service] -->|Cache roadmap data; 1-hour TTL; list invalidation| Redis
+    Interview[Interview service] -->|Read / invalidate interview:user cache| Redis
+    Resume --> Mongo[(MongoDB durable records)]
+    Roadmap --> Mongo
+    Interview --> Mongo
+    Auth --> Mongo

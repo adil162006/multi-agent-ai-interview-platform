@@ -1,0 +1,19 @@
+flowchart TD
+    Request[Interview API request] --> Action{action}
+    Action -->|start| InterviewNode[Interview graph node]
+    InterviewNode --> InterviewAgent[Interview agent]
+    InterviewAgent --> LLM[Groq chat model]
+    LLM --> Questions[Question JSON]
+    Action -->|feedback| FeedbackNode[Feedback graph node]
+    FeedbackNode --> FeedbackAgent[Feedback agent]
+    FeedbackAgent --> LLM
+    LLM --> Complete{completed?}
+    Complete -->|No| ReturnFeedback[Return feedback]
+    Complete -->|Yes| SummaryNode[Summary graph node]
+    SummaryNode --> SummaryAgent[Summary agent]
+    SummaryAgent --> LLM
+    LLM --> Report[Report JSON]
+    Questions --> Mongo[(MongoDB interview)]
+    Report --> Mongo
+    Roadmap[Roadmap workflow] --> RoadmapAgent[Roadmap agent] --> ResourceAgent[Resource agent]
+    ResourceAgent --> YouTube[YouTube API]

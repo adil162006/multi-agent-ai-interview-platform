@@ -1,0 +1,14 @@
+flowchart TB
+    ALB[ALB] --> GW[ECS Gateway service]
+    subgraph Cluster[ECS cluster - stated model]
+        GW --> Auth[Auth service]
+        GW --> Resume[Resume service]
+        GW --> Interview[Interview service]
+        GW --> Roadmap[Roadmap service]
+        GW --> Billing[Billing service]
+    end
+    Auth --> Redis[(Redis)]
+    Resume --> Redis
+    Interview --> Redis
+    Roadmap --> Redis
+    Note[Separate ECS task definitions and service counts are deployment configuration, not checked in]

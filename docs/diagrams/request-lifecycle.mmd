@@ -1,0 +1,25 @@
+sequenceDiagram
+    participant UI as React client
+    participant Edge as CloudFront (stated)
+    participant ALB as ALB (stated)
+    participant GW as Gateway
+    participant Redis as Redis
+    participant Svc as Backend service
+    participant LLM as LLM / external API
+    participant DB as MongoDB
+    UI->>Edge: API request with credentials
+    Edge->>ALB: Forward (origin protocol unverified)
+    ALB->>GW: Route to Gateway target
+    GW->>Redis: Validate session for protected path
+    Redis-->>GW: Session/user data
+    GW->>Svc: Proxy request + x-user-id
+    opt AI-enabled operation
+        Svc->>LLM: Synchronous model invocation
+        LLM-->>Svc: Generated output
+    end
+    Svc->>DB: Read/write durable record
+    DB-->>Svc: Result
+    Svc-->>GW: HTTP response
+    GW-->>ALB: Response
+    ALB-->>Edge: Origin response
+    Edge-->>UI: Response

@@ -1,0 +1,10 @@
+flowchart LR
+    Code[Source + Dockerfile] --> Build[Docker build]
+    Build --> Tag[Tag image]
+    Tag --> ECR[(ECR)]
+    ECR --> Revision[Task-definition revision references image]
+    Revision --> Service[ECS service deployment]
+    Service --> Task[New running ECS tasks]
+    Task --> Health[Task/container and target health]
+    Health --> Target[Gateway target group]
+    Previous[Prior known-good revision/image] -. rollback .-> Service

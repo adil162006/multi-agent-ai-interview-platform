@@ -1,0 +1,25 @@
+flowchart LR
+    Client[Browser / React application] --> CF[CloudFront - stated, config unverified]
+    CF --> ALB[Application Load Balancer - stated]
+    ALB --> GW[Gateway - Express]
+    GW --> Auth[Auth service]
+    GW --> Resume[Resume service]
+    GW --> Interview[Interview service]
+    GW --> Roadmap[Roadmap service]
+    GW --> Billing[Billing service]
+    GW --> Redis[(Redis / stated ElastiCache)]
+    Auth --> Redis
+    Resume --> Redis
+    Interview --> Redis
+    Roadmap --> Redis
+    Auth --> Mongo[(MongoDB)]
+    Resume --> Mongo
+    Interview --> Mongo
+    Roadmap --> Mongo
+    Billing --> Mongo
+    Auth --> Firebase[Firebase]
+    Resume --> Groq[Groq LLM]
+    Interview --> Groq
+    Roadmap --> Groq
+    Roadmap --> YouTube[YouTube Data API]
+    Billing --> Razorpay[Razorpay]

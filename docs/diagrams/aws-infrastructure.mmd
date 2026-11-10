@@ -1,0 +1,12 @@
+flowchart TB
+    User[Client] --> CF[CloudFront - stated]
+    CF --> ALB[ALB - stated]
+    subgraph VPC[Application VPC - topology unverified]
+        ALB --> TG[Gateway target group - stated path]
+        TG --> ECS[ECS cluster/services - stated]
+        ECS --> ECR[(ECR image registry)]
+        ECS --> Redis[(ElastiCache Redis OSS - stated)]
+    end
+    ECS --> Mongo[(MongoDB - hosting unverified)]
+    ECS --> External[External providers]
+    Note[Listeners, subnets, task definitions, IAM, SG rules and TLS settings are not in repository]
